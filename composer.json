@@ -3,7 +3,7 @@
     "description": "A command for importing and exporting from an SQLite database",
     "homepage": "https://github.com/Automattic/wp-cli-sqlite-command",
     "type": "wp-cli-package",
-    "license": "MIT",
+    "license": "GPL-2.0-or-later",
     "autoload": {
         "files": [ "command.php" ],
         "classmap": ["src/" ]
