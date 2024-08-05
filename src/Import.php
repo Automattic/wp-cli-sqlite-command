@@ -58,7 +58,7 @@ class Import extends Base {
 			$result = $this->translator->query( $statement );
 			if ( false === $result ) {
 				WP_CLI::warning( 'Could not execute statement: ' . $statement );
-				echo $this->translator->get_error_message(); die();
+				echo $this->translator->get_error_message();
 			}
 		}
 	}
