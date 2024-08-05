@@ -1,6 +1,8 @@
 automattic/wp-cli-sqlite-command
 ================================
 
+[![Code Quality Checks](https://github.com/Automattic/wp-cli-sqlite-command/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Automattic/wp-cli-sqlite-command/actions/workflows/code-quality.yml)
+
 Imports and exports SQLite databases using WP-CLI.
 
 ## Using
