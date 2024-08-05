@@ -1,7 +1,12 @@
 <?php
 
+namespace Automattic\WP_CLI\SQLite;
 
-class Sqlite_Command extends WP_CLI_Command {
+use WP_CLI;
+use WP_CLI_Command;
+
+class SQLite_Command extends WP_CLI_Command {
+
 
 	/**
 	 * Imports the database to SQLite.
@@ -11,15 +16,11 @@ class Sqlite_Command extends WP_CLI_Command {
 	 * <file>
 	 * : The file to import or - for stdin.
 	 */
-	public function import($args, $assoc_args) {
+	public function import( $args, $assoc_args ) {
 		WP_CLI::success( 'Importing database...' );
-
-		$import = new WP_CLI\SQLite\Import();
-
-		$file = $args[0];
-
+		$import = new Import();
+		$file   = $args[0];
 		$import->run( $file, $assoc_args );
-
 	}
 
 
@@ -31,10 +32,9 @@ class Sqlite_Command extends WP_CLI_Command {
 	 * <file>
 	 * : The file to export to or - for stdout.
 	 */
-	public function export($args, $assoc_args) {
+	public function export( $args, $assoc_args ) {
 		WP_CLI::success( 'Exporting database...' );
-
-		$export = new WP_CLI\SQLite\Export();
+		$export = new Export();
 		$export->run( $args[0], $assoc_args );
 	}
 }

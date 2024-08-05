@@ -1,5 +1,5 @@
 <?php
-namespace WP_CLI\SQLite;
+namespace Automattic\WP_CLI\SQLite;
 
 use Exception;
 use Generator;
