@@ -5,8 +5,6 @@ use WP_CLI;
 
 class Base {
 
-	protected $unsupported_arguments = [];
-
 	/**
 	 * Get the version of the SQLite integration plugin if it is installed
 	 * and activated.
@@ -85,31 +83,11 @@ class Base {
 		}
 
 		// We also need to selectively load the necessary classes from the plugin.
-		require_once $plugin_directory . '/php-polyfills.php';
 		require_once $plugin_directory . '/constants.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-lexer.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-query-rewriter.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-translator.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-token.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-pdo-user-defined-functions.php';
-	}
-
-	/**
-	 * Check if the arguments passed to the command are supported.
-	 *
-	 * @param $args
-	 *
-	 * @return void
-	 * @throws WP_CLI\ExitException
-	 */
-	protected function check_arguments( $args ) {
-		if ( array_intersect_key( $args, array_flip( $this->unsupported_arguments ) ) ) {
-			WP_CLI::error(
-				sprintf(
-					'The following arguments are not supported by SQLite exports: %s',
-					implode( ', ', $this->unsupported_arguments )
-				)
-			);
-		}
 	}
 }

@@ -13,7 +13,6 @@ WP_CLI::add_command(
 	'\Automattic\WP_CLI\SQLite\SQLite_Command',
 	array(
 		'before_invoke' => function () {
-			// Load the SQLite driver
 			$min_version = '7.4';
 			if ( version_compare( PHP_VERSION, $min_version, '<' ) ) {
 				WP_CLI::error( "The `wp server` command requires PHP {$min_version} or newer." );
