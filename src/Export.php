@@ -1,5 +1,5 @@
 <?php
-namespace WP_CLI\SQLite;
+namespace Automattic\WP_CLI\SQLite;
 
 use Exception;
 use PDO;
@@ -7,18 +7,6 @@ use WP_CLI;
 use WP_SQLite_Translator;
 
 class Export extends Base {
-
-	/**
-	 * List of arguments that are not supported by the export command.
-	 * @var string[]
-	 */
-	protected $unsupported_arguments = [
-		'fields',
-		'include-tablespaces',
-		'defaults',
-		'dbuser',
-		'dbpass',
-	];
 
 	protected $translator;
 	protected $args      = array();
@@ -40,7 +28,6 @@ class Export extends Base {
 	 */
 	public function run( $result_file, $args ) {
 		$this->args = $args;
-		$this->check_arguments( $args );
 
 		$handle = $this->open_output_stream( $result_file );
 

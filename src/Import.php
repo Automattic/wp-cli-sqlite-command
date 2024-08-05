@@ -1,5 +1,5 @@
 <?php
-namespace WP_CLI\SQLite;
+namespace Automattic\WP_CLI\SQLite;
 
 use Exception;
 use Generator;
@@ -7,14 +7,6 @@ use WP_CLI;
 use WP_SQLite_Translator;
 
 class Import extends Base {
-
-	protected $unsupported_arguments = [
-		'skip-optimization',
-		'defaults',
-		'fields',
-		'dbuser',
-		'dbpass',
-	];
 
 	protected $translator;
 	protected $args;
@@ -34,7 +26,6 @@ class Import extends Base {
 	 */
 	public function run( $sql_file_path, $args ) {
 		$this->args = $args;
-		$this->check_arguments( $args );
 
 		$is_stdin    = '-' === $sql_file_path;
 		$import_file = $is_stdin ? 'php://stdin' : $sql_file_path;
@@ -58,7 +49,7 @@ class Import extends Base {
 			$result = $this->translator->query( $statement );
 			if ( false === $result ) {
 				WP_CLI::warning( 'Could not execute statement: ' . $statement );
-				echo $this->translator->get_error_message(); die();
+				echo $this->translator->get_error_message();
 			}
 		}
 	}
