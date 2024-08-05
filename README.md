@@ -38,5 +38,5 @@ $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
 		Exclude certain tables from the export. Use commas to separate multiple table names.
 
 	[--porcelain]
-		Output just the SQL commands, without any comments.
+		Output filename for the exported database.
 

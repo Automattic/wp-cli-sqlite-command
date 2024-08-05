@@ -1,6 +1,7 @@
 {
     "name": "automattic/wp-cli-sqlite-command",
     "description": "A command for importing and exporting from an SQLite database",
+    "homepage": "https://github.com/Automattic/wp-cli-sqlite-command",
     "type": "wp-cli-package",
     "license": "MIT",
     "autoload": {
@@ -36,11 +37,8 @@
         ]
     },
     "config": {
-        "process-timeout": 7200,
-        "sort-packages": true,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "johnpbloch/wordpress-core-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
 }
