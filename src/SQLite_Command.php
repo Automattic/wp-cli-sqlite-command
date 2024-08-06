@@ -20,6 +20,8 @@ class SQLite_Command extends WP_CLI_Command {
 	 *      # Import the database from a file
 	 *      $ wp sqlite import wordpress_dbase.sql
 	 *      Success: Imported from 'import wordpress_dbase.sql'.
+	 *
+	 * @when before_wp_load
 	 */
 	public function import( $args, $assoc_args ) {
 
@@ -73,6 +75,8 @@ class SQLite_Command extends WP_CLI_Command {
 	 *  # Export all tables except specific tables
 	 *  $ wp sqlite export --exclude_tables=wp_posts,wp_users
 	 *  Success: Exported to 'wordpress_dbase.sql'.
+	 *
+	 * @when before_wp_load
 	 */
 	public function export( $args, $assoc_args ) {
 		WP_CLI::success( 'Exporting database...' );
