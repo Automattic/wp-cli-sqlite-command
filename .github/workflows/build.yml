@@ -29,7 +29,9 @@ jobs:
             . dist/
 
       - name: Create ZIP archive
-        run: zip -r distribution.zip dist
+        run: |
+          cd dist
+          zip -r distribution.zip .
 
       - name: Upload distribution as artifact
         uses: actions/upload-artifact@v2
