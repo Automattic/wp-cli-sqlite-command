@@ -22,6 +22,9 @@ jobs:
         id: set_version
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
+      - name: Create version file
+        run: echo "${{ env.RELEASE_VERSION }}" > version
+
       - name: Create distribution
         run: |
           mkdir temp_dist
@@ -31,6 +34,7 @@ jobs:
             --exclude='.github' \
             --exclude='temp_dist' \
             . temp_dist/
+          cp version temp_dist/
 
       - name: Create ZIP archive
         run: |
@@ -38,7 +42,7 @@ jobs:
           zip -r ../wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip .
 
       - name: Clean up
-        run: rm -rf temp_dist
+        run: rm -rf temp_dist version
 
       - name: Upload distribution as artifact
         uses: actions/upload-artifact@v2
