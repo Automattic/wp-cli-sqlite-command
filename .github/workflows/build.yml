@@ -16,7 +16,7 @@ jobs:
           php-version: '8.1'
 
       - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
       - name: Set release version
         id: set_version
