@@ -1,4 +1,4 @@
-name: Build and Distribute Package
+name: Build and Distribute SQLite Command Package
 
 on:
   release:
@@ -18,26 +18,33 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
 
+      - name: Set release version
+        id: set_version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Create distribution
         run: |
-          mkdir dist
+          mkdir temp_dist
           rsync -av \
             --exclude-from='.distignore' \
             --exclude='.git' \
             --exclude='.github' \
-            --exclude='dist' \
-            . dist/
+            --exclude='temp_dist' \
+            . temp_dist/
 
       - name: Create ZIP archive
         run: |
-          cd dist
-          zip -r distribution.zip .
+          cd temp_dist
+          zip -r ../wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip .
+
+      - name: Clean up
+        run: rm -rf temp_dist
 
       - name: Upload distribution as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: distribution
-          path: distribution.zip
+          name: wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}
+          path: wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip
 
       - name: Upload to release
         uses: actions/upload-release-asset@v1
@@ -45,6 +52,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./distribution.zip
-          asset_name: distribution.zip
+          asset_path: ./wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip
+          asset_name: wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip
           asset_content_type: application/zip
