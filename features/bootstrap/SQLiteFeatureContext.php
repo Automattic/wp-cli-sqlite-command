@@ -102,4 +102,67 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 		file_put_contents( $full_path, $content );
 	}
+
+
+	////
+	/**
+	 * @Given /^the SQLite database contains some sample data$/
+	 */
+	public function theSqliteDatabaseContainsSomeSampleData() {
+						$this->connectToDatabase();
+						$this->db->exec(
+							"
+									INSERT OR REPLACE INTO wp_posts (ID, post_title, post_content, post_type, post_status)
+									VALUES (1, 'Sample Post', 'This is a sample post content.', 'post', 'publish');
+							"
+						);
+
+							// Insert or update sample data in wp_users
+							$this->db->exec(
+								"
+									INSERT OR REPLACE INTO wp_users (ID, user_login, user_pass, user_nicename, user_email)
+									VALUES (1, 'testuser', 'password_hash', 'Test User', 'testuser@example.com');
+							"
+							);
+
+							// Insert or update sample data in wp_options
+							$this->db->exec(
+								"
+									INSERT OR REPLACE INTO wp_options (option_id, option_name, option_value, autoload)
+									VALUES
+									(1, 'siteurl', 'http://example.com', 'yes'),
+									(2, 'blogname', 'Test Blog', 'yes'),
+									(3, 'blogdescription', 'Just another WordPress site', 'yes'),
+									(4, 'users_can_register', '0', 'yes'),
+									(5, 'admin_email', 'admin@example.com', 'yes'),
+									(6, 'start_of_week', '1', 'yes'),
+									(7, 'use_balanceTags', '0', 'yes'),
+									(8, 'use_smilies', '1', 'yes'),
+									(9, 'require_name_email', '1', 'yes'),
+									(10, 'comments_notify', '1', 'yes');
+							"
+							);
+	}
+
+	/**
+	 * @Then /^the file "([^"]*)" should contain:$/
+	 */
+	public function theFileShouldContain( $filename, PyStringNode $content ) {
+		$full_path    = $this->variables['RUN_DIR'] . '/' . $filename;
+		$file_content = file_get_contents( $full_path );
+		if ( strpos( $file_content, (string) $content ) === false ) {
+			throw new Exception( "File does not contain expected content:\n" . $content );
+		}
+	}
+
+	/**
+	 * @Then /^the file "([^"]*)" should not contain:$/
+	 */
+	public function theFileShouldNotContain( $filename, PyStringNode $content ) {
+		$full_path    = $this->variables['RUN_DIR'] . '/' . $filename;
+		$file_content = file_get_contents( $full_path );
+		if ( strpos( $file_content, (string) $content ) !== false ) {
+			throw new Exception( "File contains unexpected content:\n" . $content );
+		}
+	}
 }

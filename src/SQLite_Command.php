@@ -79,7 +79,11 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when after_wp_load
 	 */
 	public function export( $args, $assoc_args ) {
-		WP_CLI::success( 'Exporting database...' );
+		$is_porcelain = isset( $assoc_args['porcelain'] );
+
+		if ( ! $is_porcelain ) {
+			WP_CLI::success( 'Exporting database...' );
+		}
 		$export = new Export();
 
 		if ( ! empty( $args[0] ) ) {
