@@ -1,44 +1,53 @@
 {
-    "name": "automattic/wp-cli-sqlite-command",
-    "description": "A command for importing and exporting from an SQLite database",
-    "homepage": "https://github.com/Automattic/wp-cli-sqlite-command",
-    "type": "wp-cli-package",
-    "license": "GPL-2.0-or-later",
-    "autoload": {
-        "files": [ "command.php" ],
-        "classmap": ["src/" ]
-    },
-    "authors": [
-        {
-            "name": "Jeroen Pfeil",
-            "email": "jeroen.pfeil@automattic.com"
-        }
+  "name": "automattic/wp-cli-sqlite-command",
+  "description": "A command for importing and exporting from an SQLite database",
+  "homepage": "https://github.com/Automattic/wp-cli-sqlite-command",
+  "type": "wp-cli-package",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "files": [
+      "command.php"
     ],
-    "require": {
-        "php": ">=7.4",
-        "wp-cli/wp-cli": "^2.5"
-    },
-    "require-dev": {
-        "wp-cli/wp-cli-tests": "^4"
-    },
-    "scripts": {
-        "behat": "run-behat-tests",
-        "behat-rerun": "rerun-behat-tests",
-        "lint": "run-linter-tests",
-        "phpcs": "run-phpcs-tests",
-        "phpcbf": "run-phpcbf-cleanup",
-        "phpunit": "run-php-unit-tests",
-        "prepare-tests": "install-package-tests",
-        "test": [
-            "@lint",
-            "@phpcs",
-            "@phpunit",
-            "@behat"
-        ]
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+    "classmap": [
+      "src/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WP_CLI\\SQLite\\": "features/bootstrap/"
     }
+  },
+  "authors": [
+    {
+      "name": "Jeroen Pfeil",
+      "email": "jeroen.pfeil@automattic.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "wp-cli/wp-cli": "^2.5"
+  },
+  "require-dev": {
+    "wp-cli/wp-cli-tests": "^4"
+  },
+  "scripts": {
+    "behat": "run-behat-tests",
+    "behat-rerun": "rerun-behat-tests",
+    "lint": "run-linter-tests",
+    "phpcs": "run-phpcs-tests",
+    "phpcbf": "run-phpcbf-cleanup",
+    "phpunit": "run-php-unit-tests",
+    "prepare-tests": "install-package-tests",
+    "test": [
+      "@lint",
+      "@phpcs",
+      "@phpunit",
+      "@behat"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
 }
