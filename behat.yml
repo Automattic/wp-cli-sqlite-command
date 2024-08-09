@@ -2,6 +2,6 @@ default:
   suites:
     default:
       contexts:
-        - WP_CLI_SQLite_FeatureContext
+        - SQLiteFeatureContext
       paths:
         - features
