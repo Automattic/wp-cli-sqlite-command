@@ -49,7 +49,11 @@ class WP_CLI_SQLite_FeatureContext extends WPCLIFeatureContext implements Contex
 		$this->connectToDatabase();
 		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table'" );
 		$tables = [];
-		while ( $row = $result->fetchArray() ) {
+		while ( true ) {
+			$row = $result->fetchArray();
+			if ( false === $row ) {
+				break;
+			}
 			$tables[] = $row['name'];
 		}
 		if ( empty( $tables ) ) {
