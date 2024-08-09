@@ -2,6 +2,6 @@ default:
   suites:
     default:
       contexts:
-        - SQLiteFeatureContext
+        - Automattic\WP_CLI\SQLite\SQLiteFeatureContext
       paths:
         - features
