@@ -7,8 +7,11 @@ on:
       - main
       - master
   schedule:
-    - cron:  '17 1 * * *' # Run every day on a seemly random time.
+    - cron: "17 1 * * *" # Run every day on a seemly random time.
 
 jobs:
   test:
     uses: wp-cli/.github/.github/workflows/reusable-testing.yml@main
+    strategy:
+      matrix:
+        php: ["7.4", "8.0", "8.1", "8.3"]
