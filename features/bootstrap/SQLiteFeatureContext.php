@@ -12,11 +12,6 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	private $db;
 
-	public function __construct() {
-		putenv( 'WP_CLI_TEST_DBTYPE=sqlite' );
-		parent::__construct();
-	}
-
 	/**
 	 * @Given /^a SQL dump file named "([^"]*)" with content:$/
 	 */

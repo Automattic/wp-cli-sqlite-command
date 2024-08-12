@@ -6,6 +6,7 @@ Feature: WP-CLI SQLite Import Command
   Background:
     Given a WP installation
 
+  @require-sqlite
   Scenario: Successfully import a SQLite database
     Given a SQL dump file named "test_import.sql" with content:
       """
@@ -20,6 +21,7 @@ Feature: WP-CLI SQLite Import Command
     And the SQLite database should contain a table named "test_table"
     And the "test_table" should contain a row with name "Test Name"
 
+  @require-sqlite
   Scenario: Attempt to import without specifying a file
     When I try `wp sqlite import`
     Then STDOUT should contain:
@@ -28,6 +30,7 @@ Feature: WP-CLI SQLite Import Command
       """
     And the return code should be 1
 
+  @require-sqlite
   Scenario: Import from STDIN
     Given a SQL dump file named "test_import.sql" with content:
       """
