@@ -12,6 +12,5 @@ on:
 jobs:
   test:
     uses: wp-cli/.github/.github/workflows/reusable-testing.yml@main
-    strategy:
-      matrix:
-        php: ["7.4", "8.0", "8.1", "8.3"]
+    with:
+      minimum-php: "7.4"
