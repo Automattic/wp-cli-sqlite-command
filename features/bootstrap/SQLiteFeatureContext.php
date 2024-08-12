@@ -77,13 +77,6 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 		}
 	}
 
-	/**
-	 * @BeforeScenario
-	 */
-	public function beforeScenario( BeforeScenarioScope $scope ) {
-		parent::beforeScenario( $scope );
-	}
-
 	private function connectToDatabase() {
 		if ( ! $this->db ) {
 			$run_dir  = $this->variables['RUN_DIR'];
