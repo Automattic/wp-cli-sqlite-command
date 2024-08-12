@@ -14,24 +14,3 @@ jobs:
     uses: wp-cli/.github/.github/workflows/reusable-testing.yml@main
     with:
       minimum-php: "7.4"
-  filter-sqlite:
-    needs: test
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Filter SQLite jobs
-        run: |
-          sqlite_jobs=$(echo '${{ toJson(needs.test.result) }}' | jq 'to_entries | map(select(.key | contains("sqlite"))) | from_entries')
-          echo "SQLite job results: $sqlite_jobs"
-          if echo "$sqlite_jobs" | jq -e 'has("failure")'; then
-            echo "Some SQLite jobs failed"
-            exit 1
-          elif echo "$sqlite_jobs" | jq -e 'has("cancelled")'; then
-            echo "Some SQLite jobs were cancelled"
-            exit 1
-          elif [ "$(echo "$sqlite_jobs" | jq 'length')" -eq "0" ]; then
-            echo "No SQLite jobs were run"
-            exit 1
-          else
-            echo "All SQLite jobs passed"
-          fi
