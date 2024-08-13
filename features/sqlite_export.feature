@@ -36,15 +36,15 @@ Feature: WP-CLI SQLite Export Command
     And the file "test_export_specific.sql" should exist
     And the file "test_export_specific.sql" should contain:
       """
-      CREATE TABLE wp_posts
+      CREATE TABLE `wp_posts`
       """
     And the file "test_export_specific.sql" should contain:
       """
-      CREATE TABLE wp_users
+      CREATE TABLE `wp_users`
       """
     But the file "test_export_specific.sql" should not contain:
       """
-      CREATE TABLE wp_options
+      CREATE TABLE `wp_options`
       """
 
   @require-sqlite
@@ -58,15 +58,15 @@ Feature: WP-CLI SQLite Export Command
     And the file "test_export_exclude.sql" should exist
     And the file "test_export_exclude.sql" should not contain:
       """
-      CREATE TABLE wp_posts
+      CREATE TABLE `wp_posts``
       """
     And the file "test_export_exclude.sql" should not contain:
       """
-      CREATE TABLE wp_users
+      CREATE TABLE `wp_users``
       """
     But the file "test_export_exclude.sql" should contain:
       """
-      CREATE TABLE wp_options
+      CREATE TABLE `wp_options`
       """
 
   @require-sqlite
@@ -105,13 +105,13 @@ Feature: WP-CLI SQLite Export Command
     And the file "test_export_both.sql" should exist
     And the file "test_export_both.sql" should contain:
       """
-      CREATE TABLE wp_posts
+      CREATE TABLE `wp_posts`
       """
     And the file "test_export_both.sql" should contain:
       """
-      CREATE TABLE wp_options
+      CREATE TABLE `wp_options`
       """
     But the file "test_export_both.sql" should not contain:
       """
-      CREATE TABLE wp_users
+      CREATE TABLE `wp_users`
       """

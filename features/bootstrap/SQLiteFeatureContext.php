@@ -7,6 +7,7 @@ use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\PyStringNode;
 use WP_CLI\Tests\Context\FeatureContext as WPCLIFeatureContext;
 use SQLite3;
+use Exception;
 
 class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
