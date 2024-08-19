@@ -28,7 +28,8 @@
     "wp-cli/wp-cli": "^2.5"
   },
   "require-dev": {
-    "wp-cli/wp-cli-tests": "dev-main"
+    "wp-cli/wp-cli-tests": "^4.3.2",
+    "phpcompatibility/php-compatibility": "dev-develop"
   },
   "scripts": {
     "behat": "run-behat-tests",
