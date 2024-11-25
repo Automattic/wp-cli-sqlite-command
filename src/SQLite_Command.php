@@ -142,13 +142,13 @@ class SQLite_Command extends WP_CLI_Command {
 	 *
 	 * @when before_wp_load
 	 */
-	public function tables($args, $assoc_args) {
-		if (!Base::get_sqlite_plugin_version()) {
-			WP_CLI::error('The SQLite integration plugin is not installed or activated.');
+	public function tables( $args, $assoc_args ) {
+		if ( ! Base::get_sqlite_plugin_version() ) {
+			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
 		}
 
-		$tables = new Tables();
-		$pattern = !empty($args) ? $args[0] : null;
-		$tables->run($pattern, $assoc_args);
+		$tables  = new Tables();
+		$pattern = ! empty( $args ) ? $args[0] : null;
+		$tables->run( $pattern, $assoc_args );
 	}
 }
