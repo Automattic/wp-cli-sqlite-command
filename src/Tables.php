@@ -33,37 +33,22 @@ class Tables extends Base {
 	/**
 	 * Lists all tables in the SQLite database.
 	 *
-	 * @param array|null $patterns Optional wildcard patterns to filter tables.
 	 * @param array $assoc_args Associative array of options.
 	 * @return void
 	 */
-	public function run( ?array $patterns = null, $assoc_args = [] ) {
+	public function run( $assoc_args = [] ) {
 		$pdo = $this->get_pdo();
 
 		// Get all tables
 		$stmt   = $pdo->query( "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'" );
 		$tables = $stmt->fetchAll( PDO::FETCH_COLUMN );
 
-		// Filter tables if wildcard pattern is provided
-		if ( ! empty( $patterns ) ) {
-			foreach ( $patterns as $pattern ) {
-				$tables = array_filter(
-					$tables,
-					fn ( $table ) => fnmatch( $pattern, $table, FNM_CASEFOLD )
-				);
-			}
-		}
-
 		// Remove system tables
 		$tables_to_exclude = array( '_mysql_data_types_cache' );
 		$tables            = array_diff( $tables, $tables_to_exclude );
 
 		if ( empty( $tables ) ) {
-			if ( ! empty( $patterns ) ) {
-				WP_CLI::error( 'No tables found.' );
-			} else {
-				WP_CLI::error( 'No tables found in the database.' );
-			}
+			WP_CLI::error( 'No tables found in the database.' );
 		}
 
 		$format = \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' );

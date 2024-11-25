@@ -106,11 +106,9 @@ class SQLite_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * [<table>...]
-	 * : List tables based on wildcard search, e.g. 'wp_*_options' or 'wp_post?'.
-	 *
 	 * [--format=<format>]
 	 * : Render output in a particular format.
+	 *
 	 * ---
 	 * default: list
 	 * options:
@@ -135,13 +133,6 @@ class SQLite_Command extends WP_CLI_Command {
 	 *     wp_usermeta
 	 *     wp_users
 	 *
-	 *     # List all tables matching wildcards
-	 *     $ wp sqlite tables wp_comment* wp_post*
-	 *     wp_commentmeta
-	 *     wp_comments
-	 *     wp_postmeta
-	 *     wp_posts
-	 *
 	 * @when before_wp_load
 	 */
 	public function tables( $args, $assoc_args ) {
@@ -150,6 +141,6 @@ class SQLite_Command extends WP_CLI_Command {
 		}
 
 		$tables = new Tables();
-		$tables->run( $args, $assoc_args );
+		$tables->run( $assoc_args );
 	}
 }
