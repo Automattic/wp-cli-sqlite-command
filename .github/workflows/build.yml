@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -45,7 +45,7 @@ jobs:
         run: rm -rf temp_dist version
 
       - name: Upload distribution as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}
           path: wp-cli-sqlite-command-${{ env.RELEASE_VERSION }}.zip
