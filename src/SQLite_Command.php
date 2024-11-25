@@ -135,8 +135,10 @@ class SQLite_Command extends WP_CLI_Command {
 	 *     wp_usermeta
 	 *     wp_users
 	 *
-	 *     # List all tables matching a wildcard
-	 *     $ wp sqlite tables wp_post*
+	 *     # List all tables matching wildcards
+	 *     $ wp sqlite tables wp_comment* wp_post*
+	 *     wp_commentmeta
+	 *     wp_comments
 	 *     wp_postmeta
 	 *     wp_posts
 	 *
@@ -147,8 +149,7 @@ class SQLite_Command extends WP_CLI_Command {
 			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
 		}
 
-		$tables  = new Tables();
-		$pattern = ! empty( $args ) ? $args[0] : null;
-		$tables->run( $pattern, $assoc_args );
+		$tables = new Tables();
+		$tables->run( $args, $assoc_args );
 	}
 }

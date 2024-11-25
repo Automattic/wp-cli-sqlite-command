@@ -33,11 +33,11 @@ class Tables extends Base {
 	/**
 	 * Lists all tables in the SQLite database.
 	 *
-	 * @param string|null $pattern Optional wildcard pattern to filter tables.
+	 * @param array|null $patterns Optional wildcard patterns to filter tables.
 	 * @param array $assoc_args Associative array of options.
 	 * @return void
 	 */
-	public function run( $pattern = null, $assoc_args = [] ) {
+	public function run( ?array $patterns = null, $assoc_args = [] ) {
 		$pdo = $this->get_pdo();
 
 		// Get all tables
@@ -45,16 +45,13 @@ class Tables extends Base {
 		$tables = $stmt->fetchAll( PDO::FETCH_COLUMN );
 
 		// Filter tables if wildcard pattern is provided
-		if ( $pattern ) {
-			$sql_pattern = str_replace( '?', '_', $pattern );
-			$sql_pattern = str_replace( '*', '%', $sql_pattern );
-
-			$tables = array_filter(
-				$tables,
-				function ( $table ) use ( $pattern ) {
-					return fnmatch( $pattern, $table, FNM_CASEFOLD );
-				}
-			);
+		if ( ! empty( $patterns ) ) {
+			foreach ( $patterns as $pattern ) {
+				$tables = array_filter(
+					$tables,
+					fn ( $table ) => fnmatch( $pattern, $table, FNM_CASEFOLD )
+				);
+			}
 		}
 
 		// Remove system tables
@@ -62,8 +59,8 @@ class Tables extends Base {
 		$tables            = array_diff( $tables, $tables_to_exclude );
 
 		if ( empty( $tables ) ) {
-			if ( $pattern ) {
-				WP_CLI::error( 'No tables found matching: ' . $pattern );
+			if ( ! empty( $patterns ) ) {
+				WP_CLI::error( 'No tables found.' );
 			} else {
 				WP_CLI::error( 'No tables found in the database.' );
 			}
