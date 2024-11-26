@@ -4,7 +4,6 @@ namespace Automattic\WP_CLI\SQLite;
 
 use WP_CLI;
 use WP_CLI_Command;
-use PDO;
 
 class SQLite_Command extends WP_CLI_Command {
 

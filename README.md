@@ -47,13 +47,10 @@ $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
 Lists the SQLite database tables.
 
 ```
-$ wp sqlite tables [--pattern=<pattern>] [--format=<list|csv>]
+$ wp sqlite tables [--format=<list|csv>]
 ```
 
 **OPTIONS**
-
-	[--pattern=<pattern>]
-		Filter the list of tables by a wildcard pattern.
 
 	[--format=<format>]
 		Render output in a specific format.
@@ -79,11 +76,6 @@ $ wp sqlite tables [--pattern=<pattern>] [--format=<list|csv>]
 	wp_comments
 	wp_links
 	wp_options
-	wp_postmeta
-	wp_posts
-
-    # List all tables matching a wildcard
-    $ wp sqlite tables "wp_post*"
 	wp_postmeta
 	wp_posts
 

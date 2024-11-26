@@ -6,15 +6,10 @@ use WP_CLI;
 use PDO;
 use WP_SQLite_Translator;
 
-/**
- * Class Tables
- * Handles listing tables in the SQLite database.
- */
 class Tables extends Base {
 
 	protected $translator;
 	protected $args      = array();
-	protected $is_stdout = false;
 
 	public function __construct() {
 		$this->load_dependencies();
