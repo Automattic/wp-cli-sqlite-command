@@ -9,7 +9,6 @@ use WP_SQLite_Translator;
 class Tables extends Base {
 
 	protected $translator;
-	protected $args      = array();
 
 	public function __construct() {
 		$this->load_dependencies();
