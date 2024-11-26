@@ -42,3 +42,44 @@ $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
 	[--porcelain]
 		Output filename for the exported database.
 
+### wp sqlite tables
+
+Lists the SQLite database tables.
+
+```
+$ wp sqlite tables [--format=<list|csv>]
+```
+
+**OPTIONS**
+
+	[--format=<format>]
+		Render output in a specific format.
+		---
+		Default: list
+		Options:
+			- list
+			- csv
+		---
+
+**EXAMPLES**
+
+```
+    # List all tables
+    $ wp sqlite tables
+	wp_users
+	wp_usermeta
+	wp_termmeta
+	wp_terms
+	wp_term_taxonomy
+	wp_term_relationships
+	wp_commentmeta
+	wp_comments
+	wp_links
+	wp_options
+	wp_postmeta
+	wp_posts
+
+	* List all tables in CSV format
+	$ wp sqlite tables --format=csv
+	wp_users,wp_usermeta,wp_termmeta,wp_terms,wp_term_taxonomy,wp_term_relationships,wp_commentmeta,wp_comments,wp_links,wp_options,wp_postmeta,wp_posts
+```

@@ -97,4 +97,49 @@ class SQLite_Command extends WP_CLI_Command {
 
 		$export->run( $result_file, $assoc_args );
 	}
+
+	/**
+	 * Lists the database tables.
+	 *
+	 * Defaults to all tables in the SQLite database.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 *
+	 * ---
+	 * default: list
+	 * options:
+	 *   - list
+	 *   - csv
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # List all tables in the database
+	 *     $ wp sqlite tables
+	 *     wp_commentmeta
+	 *     wp_comments
+	 *     wp_links
+	 *     wp_options
+	 *     wp_postmeta
+	 *     wp_posts
+	 *     wp_terms
+	 *     wp_termmeta
+	 *     wp_term_relationships
+	 *     wp_term_taxonomy
+	 *     wp_usermeta
+	 *     wp_users
+	 *
+	 * @when before_wp_load
+	 */
+	public function tables( $args, $assoc_args ) {
+		if ( ! Base::get_sqlite_plugin_version() ) {
+			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
+		}
+
+		$tables = new Tables();
+		$tables->run( $assoc_args );
+	}
 }
