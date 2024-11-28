@@ -23,7 +23,6 @@ Feature: WP-CLI SQLite Tables Command
       wp_options
       wp_postmeta
       wp_posts
-      hello
       """
 
   @require-sqlite
