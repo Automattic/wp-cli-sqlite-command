@@ -79,6 +79,10 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when before_wp_load
 	 */
 	public function export( $args, $assoc_args ) {
+		if ( ! Export::get_sqlite_plugin_version() ) {
+			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
+		}
+
 		$is_porcelain = isset( $assoc_args['porcelain'] );
 
 		if ( ! $is_porcelain ) {
@@ -135,7 +139,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when before_wp_load
 	 */
 	public function tables( $args, $assoc_args ) {
-		if ( ! Base::get_sqlite_plugin_version() ) {
+		if ( ! Tables::get_sqlite_plugin_version() ) {
 			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
 		}
 

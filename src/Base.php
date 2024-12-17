@@ -83,6 +83,7 @@ class Base {
 		}
 
 		// We also need to selectively load the necessary classes from the plugin.
+		require_once $plugin_directory . '/php-polyfills.php';
 		require_once $plugin_directory . '/constants.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-lexer.php';
 		require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-query-rewriter.php';
