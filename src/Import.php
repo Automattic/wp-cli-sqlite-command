@@ -6,13 +6,12 @@ use Generator;
 use WP_CLI;
 use WP_SQLite_Translator;
 
-class Import extends Base {
+class Import {
 
 	protected $translator;
 	protected $args;
 
 	public function __construct() {
-		$this->load_dependencies();
 		$this->translator = new WP_SQLite_Translator();
 	}
 
