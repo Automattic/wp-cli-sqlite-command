@@ -49,7 +49,7 @@ class Tables extends Base {
 
 		if ( 'csv' === $format ) {
 			WP_CLI::line( implode( ',', $tables ) );
-		} else if ( 'json' === $format ) {
+		} elseif ( 'json' === $format ) {
 			WP_CLI::line( json_encode( array_values( $tables ) ) );
 		} else {
 			foreach ( $tables as $table ) {
