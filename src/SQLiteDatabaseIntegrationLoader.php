@@ -3,7 +3,7 @@ namespace Automattic\WP_CLI\SQLite;
 
 use WP_CLI;
 
-class Base {
+final class SQLiteDatabaseIntegrationLoader {
 
 	/**
 	 * Get the version of the SQLite integration plugin if it is installed
@@ -11,7 +11,7 @@ class Base {
 	 *
 	 * @return false|string The version of the SQLite integration plugin or false if not found/activated.
 	 */
-	public static function get_sqlite_plugin_version() {
+	public static function get_plugin_version() {
 		// Check if there is a db.php file in the wp-content directory.
 		if ( ! file_exists( ABSPATH . '/wp-content/db.php' ) ) {
 			return false;
@@ -62,13 +62,13 @@ class Base {
 	 * @return void
 	 * @throws WP_CLI\ExitException
 	 */
-	protected function load_dependencies() {
+	public static function load_plugin() {
 		$plugin_directory = self::get_plugin_directory();
 		if ( ! $plugin_directory ) {
 			WP_CLI::error( 'Could not locate the SQLite integration plugin.' );
 		}
 
-		$sqlite_plugin_version = self::get_sqlite_plugin_version();
+		$sqlite_plugin_version = self::get_plugin_version();
 		if ( ! $sqlite_plugin_version ) {
 			WP_CLI::error( 'Could not determine the version of the SQLite integration plugin.' );
 		}
