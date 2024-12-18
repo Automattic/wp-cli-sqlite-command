@@ -29,10 +29,6 @@ class SQLite_Command extends WP_CLI_Command {
 			WP_CLI::error( 'Please provide a file to import.' );
 		}
 
-		if ( ! Import::get_sqlite_plugin_version() ) {
-			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
-		}
-
 		$import = new Import();
 		$import->run( $args[0], $assoc_args );
 	}
@@ -135,10 +131,6 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when before_wp_load
 	 */
 	public function tables( $args, $assoc_args ) {
-		if ( ! Base::get_sqlite_plugin_version() ) {
-			WP_CLI::error( 'The SQLite integration plugin is not installed or activated.' );
-		}
-
 		$tables = new Tables();
 		$tables->run( $assoc_args );
 	}

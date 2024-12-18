@@ -6,14 +6,14 @@ use PDO;
 use WP_CLI;
 use WP_SQLite_Translator;
 
-class Export extends Base {
+class Export {
 
 	protected $translator;
 	protected $args      = array();
 	protected $is_stdout = false;
 
 	public function __construct() {
-		$this->load_dependencies();
+		SQLiteDatabaseIntegrationLoader::load_plugin();
 		$this->translator = new WP_SQLite_Translator();
 	}
 
