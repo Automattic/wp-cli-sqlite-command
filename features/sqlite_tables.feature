@@ -32,3 +32,11 @@ Feature: WP-CLI SQLite Tables Command
       """
       wp_users,wp_usermeta,wp_termmeta,wp_terms,wp_term_taxonomy,wp_term_relationships,wp_commentmeta,wp_comments,wp_links,wp_options,wp_postmeta,wp_posts
       """
+
+  @require-sqlite
+  Scenario: Successfully list the tables in the SQLite database in a CSV format
+    When I run `wp sqlite tables --format=json`
+    Then STDOUT should contain:
+      """
+      ["wp_users","wp_usermeta","wp_termmeta","wp_terms","wp_term_taxonomy","wp_term_relationships","wp_commentmeta","wp_comments","wp_links","wp_options","wp_postmeta","wp_posts"]
+      """
