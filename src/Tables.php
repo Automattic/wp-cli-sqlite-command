@@ -3,7 +3,6 @@
 namespace Automattic\WP_CLI\SQLite;
 
 use WP_CLI;
-use PDO;
 use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
@@ -21,33 +20,25 @@ class Tables {
 	}
 
 	/**
-	 * Get the PDO instance.
-	 *
-	 * @return PDO
-	 */
-	protected function get_pdo() {
-		if ( $this->driver instanceof WP_SQLite_Translator ) {
-			return $this->driver->get_pdo();
-		}
-		return $this->driver->get_connection()->get_pdo();
-	}
-
-	/**
 	 * Lists all tables in the SQLite database.
 	 *
 	 * @param array $assoc_args Associative array of options.
 	 * @return void
 	 */
 	public function run( $assoc_args = [] ) {
-		$pdo = $this->get_pdo();
-
 		// Get all tables
-		$stmt   = $pdo->query( "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'" );
-		$tables = $stmt->fetchAll( PDO::FETCH_COLUMN );
+		$tables = array();
+		foreach ( $this->driver->query( 'SHOW TABLES' ) as $row ) {
+			$tables[] = array_values( (array) $row )[0];
+		}
 
-		// Remove system tables
-		$tables_to_exclude = array( '_mysql_data_types_cache' );
-		$tables            = array_diff( $tables, $tables_to_exclude );
+		// With the legacy driver, we need to exclude system tables
+		// and make sure the table names are alphabetically sorted.
+		if ( $this->driver instanceof WP_SQLite_Translator ) {
+			$tables_to_exclude = array( '_mysql_data_types_cache', 'sqlite_sequence' );
+			$tables            = array_diff( $tables, $tables_to_exclude );
+			sort( $tables );
+		}
 
 		if ( empty( $tables ) ) {
 			WP_CLI::error( 'No tables found in the database.' );
