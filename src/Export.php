@@ -4,17 +4,23 @@ namespace Automattic\WP_CLI\SQLite;
 use Exception;
 use PDO;
 use WP_CLI;
+use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
 class Export {
+	/**
+	 * The SQLite driver instance.
+	 *
+	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 */
+	protected $driver;
 
-	protected $translator;
 	protected $args      = array();
 	protected $is_stdout = false;
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->translator = new WP_SQLite_Translator();
+		$this->driver = SQLiteDriverFactory::create_driver();
 	}
 
 	/**
@@ -79,19 +85,21 @@ class Export {
 	protected function write_sql_statements( $handle ) {
 		$include_tables = $this->get_include_tables();
 		$exclude_tables = $this->get_exclude_tables();
-		foreach ( $this->translator->query( 'SHOW TABLES' ) as $table ) {
+		foreach ( $this->driver->query( 'SHOW TABLES' ) as $row ) {
+			$table_name = array_values( (array) $row )[0];
+
 			// Skip tables that are not in the include_tables list if the list is defined
-			if ( ! empty( $include_tables ) && ! in_array( $table->name, $include_tables, true ) ) {
+			if ( ! empty( $include_tables ) && ! in_array( $table_name, $include_tables, true ) ) {
 				continue;
 			}
 
 			// Skip tables that are in the exclude_tables list
-			if ( in_array( $table->name, $exclude_tables, true ) ) {
+			if ( in_array( $table_name, $exclude_tables, true ) ) {
 				continue;
 			}
 
-			$this->write_create_table_statement( $handle, $table->name );
-			$this->write_insert_statements( $handle, $table->name );
+			$this->write_create_table_statement( $handle, $table_name );
+			$this->write_insert_statements( $handle, $table_name );
 		}
 
 		fwrite( $handle, sprintf( '-- Dump completed on %s', gmdate( 'c' ) ) );
@@ -144,8 +152,12 @@ class Export {
 	 * @throws Exception
 	 */
 	protected function get_create_statement( $table_name ) {
-		$create = $this->translator->query( 'SHOW CREATE TABLE ' . $table_name );
-		return $create[0]->{'Create Table'} . "\n";
+		$table_name = $this->driver instanceof WP_SQLite_Driver
+			? $this->driver->get_connection()->quote_identifier( $table_name )
+			: $table_name;
+
+		$create = $this->driver->query( 'SHOW CREATE TABLE ' . $table_name );
+		return $create[0]->{'Create Table'} . ";\n";
 	}
 
 	/**
@@ -156,7 +168,7 @@ class Export {
 	 * @return \Generator
 	 */
 	protected function get_insert_statements( $table_name ) {
-		$pdo  = $this->translator->get_pdo();
+		$pdo  = $this->get_pdo();
 		$stmt = $pdo->prepare( 'SELECT * FROM ' . $table_name );
 		$stmt->execute();
 		// phpcs:ignore
@@ -235,7 +247,7 @@ class Export {
 	 * @return string
 	 */
 	protected function escape_string( $value ) {
-		$pdo = $this->translator->get_pdo();
+		$pdo = $this->get_pdo();
 		return addcslashes( $pdo->quote( $value ), "\\\n" );
 	}
 
@@ -261,9 +273,21 @@ class Export {
 	 * @return bool
 	 */
 	protected function table_has_records( $table_name ) {
-		$pdo  = $this->translator->get_pdo();
+		$pdo  = $this->get_pdo();
 		$stmt = $pdo->prepare( 'SELECT COUNT(*) FROM ' . $table_name );
 		$stmt->execute();
 		return $stmt->fetchColumn() > 0;
+	}
+
+	/**
+	 * Get the PDO instance.
+	 *
+	 * @return PDO
+	 */
+	protected function get_pdo() {
+		if ( $this->driver instanceof WP_SQLite_Translator ) {
+			return $this->driver->get_pdo();
+		}
+		return $this->driver->get_connection()->get_pdo();
 	}
 }

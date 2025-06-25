@@ -4,15 +4,20 @@ namespace Automattic\WP_CLI\SQLite;
 
 use WP_CLI;
 use PDO;
+use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
 class Tables {
-
-	protected $translator;
+	/**
+	 * The SQLite driver instance.
+	 *
+	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 */
+	protected $driver;
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->translator = new WP_SQLite_Translator();
+		$this->driver = SQLiteDriverFactory::create_driver();
 	}
 
 	/**
@@ -21,7 +26,10 @@ class Tables {
 	 * @return PDO
 	 */
 	protected function get_pdo() {
-		return $this->translator->get_pdo();
+		if ( $this->driver instanceof WP_SQLite_Translator ) {
+			return $this->driver->get_pdo();
+		}
+		return $this->driver->get_connection()->get_pdo();
 	}
 
 	/**
