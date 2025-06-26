@@ -90,6 +90,7 @@ final class SQLiteDatabaseIntegrationLoader {
 		$new_driver_enabled   = $new_driver_supported && defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
 
 		if ( $new_driver_enabled ) {
+			require_once $plugin_directory . '/version.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-grammar.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-node.php';
@@ -97,6 +98,7 @@ final class SQLiteDatabaseIntegrationLoader {
 			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-token.php';
 			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-lexer.php';
 			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-parser.php';
+			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-pdo-user-defined-functions.php';
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-connection.php';
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-configurator.php';
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-driver.php';
