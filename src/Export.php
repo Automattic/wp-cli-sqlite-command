@@ -157,7 +157,9 @@ class Export {
 			: $table_name;
 
 		$create = $this->driver->query( 'SHOW CREATE TABLE ' . $table_name );
-		return $create[0]->{'Create Table'} . ";\n";
+		$sql    = $create[0]->{'Create Table'};
+		$sql    = rtrim( $sql, ';' ); // The old SQLite driver appends a semicolon.
+		return $sql . ";\n";
 	}
 
 	/**
