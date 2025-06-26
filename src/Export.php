@@ -93,6 +93,12 @@ class Export {
 				continue;
 			}
 
+			// Skip internal tables used by the new SQLite driver
+			// (This is only needed when exporting with the legacy driver.)
+			if ( 0 === strpos( $table_name, '_wp_sqlite_' ) ) {
+				continue;
+			}
+
 			// Skip tables that are in the exclude_tables list
 			if ( in_array( $table_name, $exclude_tables, true ) ) {
 				continue;
@@ -189,6 +195,8 @@ class Export {
 		return array_merge(
 			$exclude_tables,
 			[
+				// This list is only needed when exporting with the legacy driver.
+				// In the new SQLite driver, SHOW TABLES never returns these tables.
 				'_mysql_data_types_cache',
 				'sqlite_master',
 				'sqlite_sequence',

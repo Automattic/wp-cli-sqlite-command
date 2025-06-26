@@ -36,7 +36,13 @@ class Tables {
 		// and make sure the table names are alphabetically sorted.
 		if ( $this->driver instanceof WP_SQLite_Translator ) {
 			$tables_to_exclude = array( '_mysql_data_types_cache', 'sqlite_sequence' );
-			$tables            = array_diff( $tables, $tables_to_exclude );
+			foreach ( $tables as $table ) {
+				if ( 0 === strpos( $table, '_wp_sqlite_' ) ) {
+					$tables_to_exclude[] = $table;
+				}
+			}
+
+			$tables = array_values( array_diff( $tables, $tables_to_exclude ) );
 			sort( $tables );
 		}
 
@@ -49,7 +55,7 @@ class Tables {
 		if ( 'csv' === $format ) {
 			WP_CLI::line( implode( ',', $tables ) );
 		} elseif ( 'json' === $format ) {
-			WP_CLI::line( json_encode( array_values( $tables ) ) );
+			WP_CLI::line( json_encode( $tables ) );
 		} else {
 			foreach ( $tables as $table ) {
 				WP_CLI::line( $table );
