@@ -21,7 +21,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 *      $ wp sqlite import wordpress_dbase.sql
 	 *      Success: Imported from 'import wordpress_dbase.sql'.
 	 *
-	 * @when before_wp_load
+	 * @when after_wp_config_load
 	 */
 	public function import( $args, $assoc_args ) {
 
