@@ -86,8 +86,7 @@ final class SQLiteDatabaseIntegrationLoader {
 		require_once $plugin_directory . '/php-polyfills.php';
 		require_once $plugin_directory . '/constants.php';
 
-		$new_driver_supported = class_exists( WP_SQLite_Driver::class );
-		$new_driver_enabled   = $new_driver_supported && defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
+		$new_driver_enabled   = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
 
 		if ( $new_driver_enabled ) {
 			require_once $plugin_directory . '/version.php';
