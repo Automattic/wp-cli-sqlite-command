@@ -31,7 +31,9 @@ class SQLite_Command extends WP_CLI_Command {
 
 		if ( $enable_ast_driver ) {
 			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 			}
 		}
 
@@ -93,7 +95,9 @@ class SQLite_Command extends WP_CLI_Command {
 
 		if ( $enable_ast_driver ) {
 			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 			}
 		}
 
@@ -159,7 +163,9 @@ class SQLite_Command extends WP_CLI_Command {
 
 		if ( $enable_ast_driver ) {
 			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
 			}
 		}
 
