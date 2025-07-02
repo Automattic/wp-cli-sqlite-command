@@ -20,6 +20,9 @@ $ wp sqlite import <file>
 	<file>
 		The path to the MySQL compatible dump file to import. When passing `-` as the file argument, the SQL commands are read from standard input.
 
+	[--enable-ast-driver]
+		Enables new AST driver for full MySQL compatibility.
+
 ### wp sqlite export
 
 Exports an SQLite database to a MySQL compatible file.
@@ -42,6 +45,9 @@ $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
 	[--porcelain]
 		Output filename for the exported database.
 
+	[--enable-ast-driver]
+		Enables new AST driver for full MySQL compatibility.
+
 ### wp sqlite tables
 
 Lists the SQLite database tables.
@@ -60,6 +66,9 @@ $ wp sqlite tables [--format=<list|csv>]
 			- list
 			- csv
 		---
+
+	[--enable-ast-driver]
+		Enables new AST driver for full MySQL compatibility.
 
 **EXAMPLES**
 
