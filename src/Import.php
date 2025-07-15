@@ -7,13 +7,18 @@ use WP_CLI;
 use WP_SQLite_Translator;
 
 class Import {
+	/**
+	 * The SQLite driver instance.
+	 *
+	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 */
+	protected $driver;
 
-	protected $translator;
 	protected $args;
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->translator = new WP_SQLite_Translator();
+		$this->driver = SQLiteDriverFactory::create_driver();
 	}
 
 	/**
@@ -46,10 +51,10 @@ class Import {
 	 */
 	protected function execute_statements( $import_file ) {
 		foreach ( $this->parse_statements( $import_file ) as $statement ) {
-			$result = $this->translator->query( $statement );
+			$result = $this->driver->query( $statement );
 			if ( false === $result ) {
 				WP_CLI::warning( 'Could not execute statement: ' . $statement );
-				echo $this->translator->get_error_message();
+				echo $this->driver->get_error_message();
 			}
 		}
 	}

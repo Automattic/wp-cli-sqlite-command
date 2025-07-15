@@ -3,25 +3,20 @@
 namespace Automattic\WP_CLI\SQLite;
 
 use WP_CLI;
-use PDO;
+use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
 class Tables {
-
-	protected $translator;
+	/**
+	 * The SQLite driver instance.
+	 *
+	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 */
+	protected $driver;
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->translator = new WP_SQLite_Translator();
-	}
-
-	/**
-	 * Get the PDO instance.
-	 *
-	 * @return PDO
-	 */
-	protected function get_pdo() {
-		return $this->translator->get_pdo();
+		$this->driver = SQLiteDriverFactory::create_driver();
 	}
 
 	/**
@@ -31,15 +26,25 @@ class Tables {
 	 * @return void
 	 */
 	public function run( $assoc_args = [] ) {
-		$pdo = $this->get_pdo();
-
 		// Get all tables
-		$stmt   = $pdo->query( "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'" );
-		$tables = $stmt->fetchAll( PDO::FETCH_COLUMN );
+		$tables = array();
+		foreach ( $this->driver->query( 'SHOW TABLES' ) as $row ) {
+			$tables[] = array_values( (array) $row )[0];
+		}
 
-		// Remove system tables
-		$tables_to_exclude = array( '_mysql_data_types_cache' );
-		$tables            = array_diff( $tables, $tables_to_exclude );
+		// With the legacy driver, we need to exclude system tables
+		// and make sure the table names are alphabetically sorted.
+		if ( $this->driver instanceof WP_SQLite_Translator ) {
+			$tables_to_exclude = array( '_mysql_data_types_cache', 'sqlite_sequence' );
+			foreach ( $tables as $table ) {
+				if ( 0 === strpos( $table, '_wp_sqlite_' ) ) {
+					$tables_to_exclude[] = $table;
+				}
+			}
+
+			$tables = array_values( array_diff( $tables, $tables_to_exclude ) );
+			sort( $tables );
+		}
 
 		if ( empty( $tables ) ) {
 			WP_CLI::error( 'No tables found in the database.' );
@@ -50,7 +55,7 @@ class Tables {
 		if ( 'csv' === $format ) {
 			WP_CLI::line( implode( ',', $tables ) );
 		} elseif ( 'json' === $format ) {
-			WP_CLI::line( json_encode( array_values( $tables ) ) );
+			WP_CLI::line( json_encode( $tables ) );
 		} else {
 			foreach ( $tables as $table ) {
 				WP_CLI::line( $table );

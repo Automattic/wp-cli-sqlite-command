@@ -16,14 +16,26 @@ class SQLite_Command extends WP_CLI_Command {
 	 * <file>
 	 * : The name of the SQL file to import. If '-', then reads from STDIN. If omitted, it will look for '{dbname}.sql'.
 	 *
+	 * [--enable-ast-driver]
+	 * : Enables new AST driver for full MySQL compatibility.
+	 *
 	 * ## EXAMPLES
 	 *      # Import the database from a file
 	 *      $ wp sqlite import wordpress_dbase.sql
 	 *      Success: Imported from 'import wordpress_dbase.sql'.
 	 *
-	 * @when before_wp_load
+	 * @when after_wp_config_load
 	 */
 	public function import( $args, $assoc_args ) {
+		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
+
+		if ( $enable_ast_driver ) {
+			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+			}
+		}
 
 		if ( empty( $args[0] ) ) {
 			WP_CLI::error( 'Please provide a file to import.' );
@@ -52,6 +64,9 @@ class SQLite_Command extends WP_CLI_Command {
 	 * [--porcelain]
 	 * : Output filename for the exported database.
 	 *
+	 * [--enable-ast-driver]
+	 * : Enables new AST driver for full MySQL compatibility.
+	 *
 	 * ## EXAMPLES
 	 *  # Export the database to a file
 	 *  $ wp sqlite export wordpress_dbase.sql
@@ -72,14 +87,24 @@ class SQLite_Command extends WP_CLI_Command {
 	 *  $ wp sqlite export --exclude_tables=wp_posts,wp_users
 	 *  Success: Exported to 'wordpress_dbase.sql'.
 	 *
-	 * @when before_wp_load
+	 * @when after_wp_config_load
 	 */
 	public function export( $args, $assoc_args ) {
-		$is_porcelain = isset( $assoc_args['porcelain'] );
+		$is_porcelain      = isset( $assoc_args['porcelain'] );
+		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
+
+		if ( $enable_ast_driver ) {
+			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+			}
+		}
 
 		if ( ! $is_porcelain ) {
 			WP_CLI::success( 'Exporting database...' );
 		}
+
 		$export = new Export();
 
 		if ( ! empty( $args[0] ) ) {
@@ -111,6 +136,9 @@ class SQLite_Command extends WP_CLI_Command {
 	 *   - csv
 	 * ---
 	 *
+	 * [--enable-ast-driver]
+	 * : Enables new AST driver for full MySQL compatibility.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # List all tables in the database
@@ -128,9 +156,19 @@ class SQLite_Command extends WP_CLI_Command {
 	 *     wp_usermeta
 	 *     wp_users
 	 *
-	 * @when before_wp_load
+	 * @when after_wp_config_load
 	 */
 	public function tables( $args, $assoc_args ) {
+		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
+
+		if ( $enable_ast_driver ) {
+			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
+				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+				define( 'WP_SQLITE_AST_DRIVER', true );
+				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+			}
+		}
+
 		$tables = new Tables();
 		$tables->run( $assoc_args );
 	}
