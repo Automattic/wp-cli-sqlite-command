@@ -21,7 +21,12 @@ class SQLiteDriverFactory {
 					'path' => FQDB,
 				)
 			);
-			return new WP_SQLite_Driver( $connection, DB_NAME );
+			if ( defined( 'DB_NAME' ) && '' !== DB_NAME ) {
+				$db_name = DB_NAME;
+			} else {
+				$db_name = 'database_name_here';
+			}
+			return new WP_SQLite_Driver( $connection, $db_name );
 		}
 
 		return new WP_SQLite_Translator();
