@@ -166,4 +166,27 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 			throw new Exception( "File contains unexpected content:\n" . $content );
 		}
 	}
+
+	/**
+	 * @Given /^the SQLite database contains a test table with alphanumeric string hash values$/
+	 */
+	public function theSqliteDatabaseContainsATestTableWithAlphanumericStringHashValues() {
+		$this->connectToDatabase();
+
+		// Create a test table with hash values that look like scientific notation
+		$this->db->exec("DROP TABLE IF EXISTS test_export_alphanumeric_string");
+		$this->db->exec("
+			CREATE TABLE test_export_alphanumeric_string (
+				id INTEGER PRIMARY KEY,
+				hash_value TEXT
+			)
+		");
+
+		// Insert test data with values that might be mistaken for scientific notation
+		$this->db->exec("
+			INSERT INTO test_export_alphanumeric_string (id, hash_value) VALUES
+			(1, '123e99')
+		");
+	}
+
 }
