@@ -115,3 +115,21 @@ Feature: WP-CLI SQLite Export Command
       """
       CREATE TABLE `wp_users`
       """
+
+  @require-sqlite
+  Scenario: Export should escape alphanumeric strings with e character
+    Given the SQLite database contains a test table with alphanumeric string hash values
+    When I run `wp sqlite export test_export_alphanumeric_string.sql --tables=test_export_alphanumeric_string`
+    Then STDOUT should contain:
+      """
+      Success: Export complete. File written to test_export_alphanumeric_string.sql
+      """
+    And the file "test_export_alphanumeric_string.sql" should exist
+    And the file "test_export_alphanumeric_string.sql" should contain:
+      """
+      INSERT INTO `test_export_alphanumeric_string` VALUES (1,'123e99');
+      """
+    But the file "test_export_alphanumeric_string.sql" should not contain:
+      """
+      INSERT INTO `test_export_alphanumeric_string` VALUES (1,123e99);
+      """

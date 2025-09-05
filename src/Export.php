@@ -239,7 +239,7 @@ class Export {
 		foreach ( $values as $value ) {
 			if ( is_null( $value ) ) {
 				$escaped_values[] = 'NULL';
-			} elseif ( is_numeric( $value ) ) {
+			} elseif ( ctype_digit( $value ) ) {
 				$escaped_values[] = $value;
 			} else {
 				// Quote the values and escape encode the newlines so the insert statement appears on a single line.
