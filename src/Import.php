@@ -148,7 +148,14 @@ class Import {
 	 */
 	protected function execute_statements_with_ast_parser( $import_file ) {
 		$raw_queries = file_get_contents( $import_file );
-		$parser      = $this->driver->create_parser( $raw_queries );
+
+		// Detect and convert encoding to UTF-8
+		$detected_encoding = mb_detect_encoding( $raw_queries, mb_list_encodings(), true );
+		if ( $detected_encoding && 'UTF-8' !== $detected_encoding ) {
+			$raw_queries = mb_convert_encoding( $raw_queries, 'UTF-8', $detected_encoding );
+		}
+
+		$parser = $this->driver->create_parser( $raw_queries );
 		while ( $parser->next_query() ) {
 			$ast       = $parser->get_query_ast();
 			$statement = substr( $raw_queries, $ast->get_start(), $ast->get_length() );
