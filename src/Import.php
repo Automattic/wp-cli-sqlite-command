@@ -56,9 +56,10 @@ class Import {
 		while ( $parser->next_query() ) {
 			$ast       = $parser->get_query_ast();
 			$statement = substr( $queries_text, $ast->get_start(), $ast->get_length() );
-			$result    = $this->driver->query( $statement );
-			if ( false === $result ) {
-				WP_CLI::warning( 'Could not execute statement: ' . $statement );
+			try {
+				$this->driver->query( $statement );
+			} catch ( Exception $e ) {
+				WP_CLI::error( 'SQLite import could not execute statement: ' . $statement );
 				echo $this->driver->get_error_message();
 			}
 		}
