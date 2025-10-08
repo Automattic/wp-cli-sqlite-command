@@ -139,37 +139,30 @@ class Import {
 	}
 
 	/**
-	 * Execute SQL statements from an SQL dump file using the AST parser.
-	 *
-	 * @param $import_file
-	 *
-	 * @return void
-	 * @throws Exception
-	 */
+		 * Execute SQL statements from an SQL dump file using the AST parser.
+		 *
+		 * @param $import_file
+		 *
+		 * @return void
+		 * @throws Exception
+		 */
 	protected function execute_statements_with_ast_parser( $import_file ) {
-		$raw_queries  = file_get_contents( $import_file );
-		$queries_text = $this->remove_comments( $raw_queries );
-		$parser       = $this->driver->create_parser( $queries_text );
+		$raw_queries = file_get_contents( $import_file );
+		$parser      = $this->driver->create_parser( $raw_queries );
 		while ( $parser->next_query() ) {
 			$ast       = $parser->get_query_ast();
-			$statement = substr( $queries_text, $ast->get_start(), $ast->get_length() );
+			$statement = substr( $raw_queries, $ast->get_start(), $ast->get_length() );
 			try {
 				$this->driver->query( $statement );
 			} catch ( Exception $e ) {
+				// Skip errors when executing SET comment statements
+				if ( 0 === strpos( $statement, 'SET ' ) && false !== strpos( $statement, '*/' ) ) {
+					WP_CLI::warning( 'SQLite import SET comment statement: ' . $statement );
+					continue;
+				}
 				WP_CLI::error( 'SQLite import could not execute statement: ' . $statement );
 				echo $this->driver->get_error_message();
 			}
 		}
-	}
-
-	/**
-	 * Remove comments from the input.
-	 *
-	 * @param string $input
-	 *
-	 * @return string
-	 */
-	protected function remove_comments( $text ) {
-		return preg_replace( '/\/\*.*?\*\/(;)?/s', '', $text );
 	}
 }
