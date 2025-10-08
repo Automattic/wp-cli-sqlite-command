@@ -164,7 +164,7 @@ class Import {
 			} catch ( Exception $e ) {
 				// Skip errors when executing SET comment statements
 				if ( 0 === strpos( $statement, 'SET ' ) && false !== strpos( $statement, '*/' ) ) {
-					WP_CLI::warning( 'SQLite import SET comment statement: ' . $statement );
+					echo 'Warning - SQLite import skipped SET comment statement: ' . $statement . PHP_EOL;
 					continue;
 				}
 				WP_CLI::error( 'SQLite import could not execute statement: ' . $statement );
