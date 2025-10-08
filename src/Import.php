@@ -45,8 +45,14 @@ class Import {
 		WP_CLI::success( sprintf( "Imported from '%s'.", $imported_from ) );
 	}
 
-
-
+	/**
+	 * Execute SQL statements from an SQL dump file.
+	 *
+	 * @param $import_file
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
 	protected function execute_statements( $import_file ) {
 		foreach ( $this->parse_statements( $import_file ) as $statement ) {
 			$result = $this->driver->query( $statement );
@@ -133,7 +139,7 @@ class Import {
 	}
 
 	/**
-	 * Execute SQL statements from an SQL dump file.
+	 * Execute SQL statements from an SQL dump file using the AST parser.
 	 *
 	 * @param $import_file
 	 *
