@@ -50,8 +50,13 @@ class Import {
 	 * @throws Exception
 	 */
 	protected function execute_statements( $import_file ) {
-		foreach ( $this->parse_statements( $import_file ) as $statement ) {
-			$result = $this->driver->query( $statement );
+		$raw_queries  = file_get_contents( $import_file );
+		$queries_text = $this->remove_comments( $raw_queries );
+		$parser       = $this->driver->create_parser( $queries_text );
+		while ( $parser->next_query() ) {
+			$ast       = $parser->get_query_ast();
+			$statement = substr( $queries_text, $ast->get_start(), $ast->get_length() );
+			$result    = $this->driver->query( $statement );
 			if ( false === $result ) {
 				WP_CLI::warning( 'Could not execute statement: ' . $statement );
 				echo $this->driver->get_error_message();
@@ -60,77 +65,13 @@ class Import {
 	}
 
 	/**
-	 * Parse SQL statements from an SQL dump file.
-	 * @param string $sql_file_path The path to the SQL dump file.
+	 * Remove comments from the input.
 	 *
-	 * @return Generator A generator that yields SQL statements.
+	 * @param string $input
+	 *
+	 * @return string
 	 */
-	public function parse_statements( $sql_file_path ) {
-
-		$handle = fopen( $sql_file_path, 'r' );
-
-		if ( ! $handle ) {
-			WP_CLI::error( "Unable to open file: $sql_file_path" );
-		}
-
-		$single_quotes = 0;
-		$double_quotes = 0;
-		$in_comment    = false;
-		$buffer        = '';
-
-		// phpcs:ignore
-		while ( ( $line = fgets( $handle ) ) !== false ) {
-			$line = trim( $line );
-
-			// Skip empty lines and comments
-			if ( empty( $line ) || strpos( $line, '--' ) === 0 || strpos( $line, '#' ) === 0 ) {
-				continue;
-			}
-
-			// Handle multi-line comments
-			if ( ! $in_comment && strpos( $line, '/*' ) === 0 ) {
-				$in_comment = true;
-			}
-			if ( $in_comment ) {
-				if ( strpos( $line, '*/' ) !== false ) {
-					$in_comment = false;
-				}
-				continue;
-			}
-
-			$strlen = strlen( $line );
-			for ( $i = 0; $i < $strlen; $i++ ) {
-				$ch = $line[ $i ];
-
-				// Handle escaped characters
-				if ( $i > 0 && '\\' === $line[ $i - 1 ] ) {
-					$buffer .= $ch;
-					continue;
-				}
-
-				// Handle quotes
-				if ( "'" === $ch && 0 === $double_quotes ) {
-					$single_quotes = 1 - $single_quotes;
-				}
-				if ( '"' === $ch && 0 === $single_quotes ) {
-					$double_quotes = 1 - $double_quotes;
-				}
-
-				// Process statement end
-				if ( ';' === $ch && 0 === $single_quotes && 0 === $double_quotes ) {
-					yield trim( $buffer );
-					$buffer = '';
-				} else {
-					$buffer .= $ch;
-				}
-			}
-		}
-
-		// Handle any remaining buffer content
-		if ( ! empty( $buffer ) ) {
-			yield trim( $buffer );
-		}
-
-		fclose( $handle );
+	protected function remove_comments( $text ) {
+		return preg_replace( '/\/\*.*?\*\//s', '', $text );
 	}
 }
