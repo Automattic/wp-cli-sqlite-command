@@ -139,13 +139,13 @@ class Import {
 	}
 
 	/**
-		 * Execute SQL statements from an SQL dump file using the AST parser.
-		 *
-		 * @param $import_file
-		 *
-		 * @return void
-		 * @throws Exception
-		 */
+	 * Execute SQL statements from an SQL dump file using the AST parser.
+	 *
+	 * @param $import_file
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
 	protected function execute_statements_with_ast_parser( $import_file ) {
 		$raw_queries = file_get_contents( $import_file );
 		$parser      = $this->driver->create_parser( $raw_queries );
