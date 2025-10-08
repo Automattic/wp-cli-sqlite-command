@@ -73,6 +73,6 @@ class Import {
 	 * @return string
 	 */
 	protected function remove_comments( $text ) {
-		return preg_replace( '/\/\*.*?\*\//s', '', $text );
+		return preg_replace( '/\/\*.*?\*\/(;)?/s', '', $text );
 	}
 }
