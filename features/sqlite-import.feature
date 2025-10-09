@@ -114,3 +114,26 @@ Feature: WP-CLI SQLite Import Command
     And the "test_table" should contain a row with name "three"
     And the "test_table" should contain a row with name "fo -- this looks like a comment ur"
     And the "test_table" should contain a row with name "fi/* this looks like a comment */ve"
+
+  @require-sqlite
+  Scenario: Import a file quoted strings
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
+      INSERT INTO test_table (name) VALUES ('a single-quoted string with \' '' some " tricky ` chars');
+      INSERT INTO test_table (name) VALUES ("a double-quoted string with ' some \" "" tricky ` chars");
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "test_table"
+    And the "test_table" should contain a row with name:
+      """
+      a single-quoted string with ' ' some " tricky ` chars
+      """
+    And the "test_table" should contain a row with name:
+      """
+      a double-quoted string with ' some " " tricky ` chars
+      """

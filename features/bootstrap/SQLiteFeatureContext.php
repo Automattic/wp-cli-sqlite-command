@@ -38,7 +38,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 */
 	public function theTableShouldContainARowWithName( $table_name, $name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT * FROM $table_name WHERE name='$name'" );
+		$result = $this->db->query( "SELECT * FROM $table_name WHERE name='" . $this->db->escapeString( $name ) . "'" );
 		$row    = $result->fetchArray();
 		if ( ! $row ) {
 			throw new Exception( "Row with name '$name' not found in table '$table_name'." );

@@ -73,10 +73,9 @@ class Import {
 			WP_CLI::error( "Unable to open file: $sql_file_path" );
 		}
 
-		$single_quotes = 0;
-		$double_quotes = 0;
-		$in_comment    = false;
-		$buffer        = '';
+		$starting_quote = null;
+		$in_comment     = false;
+		$buffer         = '';
 
 		// phpcs:ignore
 		while ( ( $line = fgets( $handle ) ) !== false ) {
@@ -105,7 +104,7 @@ class Import {
 				}
 
 				// Handle comments.
-				if ( 0 === $single_quotes && 0 === $double_quotes ) {
+				if ( null === $starting_quote ) {
 					$prev_ch = isset( $line[ $i - 1 ] ) ? $line[ $i - 1 ] : null;
 					$next_ch = isset( $line[ $i + 1 ] ) ? $line[ $i + 1 ] : null;
 
@@ -128,15 +127,14 @@ class Import {
 				}
 
 				// Handle quotes
-				if ( "'" === $ch && 0 === $double_quotes ) {
-					$single_quotes = 1 - $single_quotes;
-				}
-				if ( '"' === $ch && 0 === $single_quotes ) {
-					$double_quotes = 1 - $double_quotes;
+				if ( null === $starting_quote && ( "'" === $ch || '"' === $ch ) ) {
+					$starting_quote = $ch;
+				} elseif ( null !== $starting_quote && $ch === $starting_quote ) {
+					$starting_quote = null;
 				}
 
 				// Process statement end
-				if ( ';' === $ch && 0 === $single_quotes && 0 === $double_quotes ) {
+				if ( ';' === $ch && null === $starting_quote ) {
 					yield trim( $buffer );
 					$buffer = '';
 				} else {
