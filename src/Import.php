@@ -86,8 +86,6 @@ class Import {
 				$line = mb_convert_encoding( $line, 'UTF-8', $detected_encoding );
 			}
 
-			$line = trim( $line );
-
 			// Skip empty lines and comments
 			if ( empty( $line ) || strpos( $line, '--' ) === 0 || strpos( $line, '#' ) === 0 ) {
 				continue;

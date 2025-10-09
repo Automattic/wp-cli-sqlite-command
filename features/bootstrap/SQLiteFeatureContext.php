@@ -34,6 +34,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	/**
 	 * @Then /^the "([^"]*)" should contain a row with name "([^"]*)"$/
+	 * @Then /^the "([^"]*)" should contain a row with name:$/
 	 */
 	public function theTableShouldContainARowWithName( $table_name, $name ) {
 		$this->connectToDatabase();
