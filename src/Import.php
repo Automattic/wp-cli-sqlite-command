@@ -86,22 +86,6 @@ class Import {
 				$line = mb_convert_encoding( $line, 'UTF-8', $detected_encoding );
 			}
 
-			// Skip empty lines and comments
-			if ( empty( $line ) || strpos( $line, '--' ) === 0 || strpos( $line, '#' ) === 0 ) {
-				continue;
-			}
-
-			// Handle multi-line comments
-			if ( ! $in_comment && strpos( $line, '/*' ) === 0 ) {
-				$in_comment = true;
-			}
-			if ( $in_comment ) {
-				if ( strpos( $line, '*/' ) !== false ) {
-					$in_comment = false;
-				}
-				continue;
-			}
-
 			$strlen = strlen( $line );
 			for ( $i = 0; $i < $strlen; $i++ ) {
 				$ch = $line[ $i ];
@@ -118,6 +102,29 @@ class Import {
 				if ( 1 === $slashes % 2 ) {
 					$buffer .= $ch;
 					continue;
+				}
+
+				// Handle comments.
+				if ( 0 === $single_quotes && 0 === $double_quotes ) {
+					$prev_ch = isset( $line[ $i - 1 ] ) ? $line[ $i - 1 ] : null;
+					$next_ch = isset( $line[ $i + 1 ] ) ? $line[ $i + 1 ] : null;
+
+					// Skip inline comments.
+					if ( ( '-' === $ch && '-' === $next_ch ) || '#' === $ch ) {
+						break; // Stop for the current line.
+					}
+
+					// Skip multi-line comments.
+					if ( ! $in_comment && '/' === $ch && '*' === $next_ch ) {
+						$in_comment = true;
+						continue;
+					}
+					if ( $in_comment ) {
+						if ( '*' === $prev_ch && '/' === $ch ) {
+							$in_comment = false;
+						}
+						continue;
+					}
 				}
 
 				// Handle quotes

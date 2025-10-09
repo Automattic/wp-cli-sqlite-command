@@ -87,3 +87,30 @@ Feature: WP-CLI SQLite Import Command
       Test that a string containing
           a newline character and some whitespace works
       """
+
+  @require-sqlite
+  Scenario: Import a file with comments
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
+      -- This is an inline comment.
+      # This is an inline comment.
+      INSERT INTO test_table (name) VALUES ('one'); -- This is an inline comment.
+      /* This is a block comment */
+      INSERT INTO test_table (name) VALUES ('two'); /* This
+        is a block comment
+        on multiple lines */ INSERT INTO test_table (name) VALUES ('three');
+      INSERT INTO test_table (name) VALUES ('fo -- this looks like a comment ur');
+      INSERT INTO test_table (name) VALUES ('fi/* this looks like a comment */ve');
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "test_table"
+    And the "test_table" should contain a row with name "one"
+    And the "test_table" should contain a row with name "two"
+    And the "test_table" should contain a row with name "three"
+    And the "test_table" should contain a row with name "fo -- this looks like a comment ur"
+    And the "test_table" should contain a row with name "fi/* this looks like a comment */ve"
