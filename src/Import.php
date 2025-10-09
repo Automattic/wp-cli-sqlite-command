@@ -127,7 +127,7 @@ class Import {
 				}
 
 				// Handle quotes
-				if ( null === $starting_quote && ( "'" === $ch || '"' === $ch ) ) {
+				if ( null === $starting_quote && ( "'" === $ch || '"' === $ch || '`' === $ch ) ) {
 					$starting_quote = $ch;
 				} elseif ( null !== $starting_quote && $ch === $starting_quote ) {
 					$starting_quote = null;

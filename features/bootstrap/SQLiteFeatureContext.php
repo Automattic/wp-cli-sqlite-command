@@ -25,7 +25,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 */
 	public function theSqliteDatabaseShouldContainATableNamed( $table_name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table' AND name='$table_name'" );
+		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table' AND name='" . $this->db->escapeString( $table_name ) . "'" );
 		$row    = $result->fetchArray();
 		if ( ! $row ) {
 			throw new Exception( "Table '$table_name' not found in the database." );

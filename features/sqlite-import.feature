@@ -137,3 +137,17 @@ Feature: WP-CLI SQLite Import Command
       """
       a double-quoted string with ' some " " tricky ` chars
       """
+
+  @require-sqlite
+  Scenario: Import a file backtick-quoted identifiers
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE `a'strange``identifier\\name` (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+
+    And the SQLite database should contain a table named "a'strange`identifier\name"
