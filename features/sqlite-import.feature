@@ -43,3 +43,27 @@ Feature: WP-CLI SQLite Import Command
       Success: Imported from 'STDIN'.
       """
     And the SQLite database should contain the imported data
+
+  @require-sqlite
+  Scenario: Import a file with escape sequences
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      SET sql_mode='NO_BACKSLASH_ESCAPES';
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
+      INSERT INTO test_table (name) VALUES ('Test that escaping a backslash \\ works');
+      INSERT INTO test_table (name) VALUES ('Test that escaping multiple backslashes \\\\\\ works');
+      INSERT INTO test_table (name) VALUES ('Test that escaping a character \a works');
+      INSERT INTO test_table (name) VALUES ('Test that escaping a backslash followed by a character \\a works');
+      INSERT INTO test_table (name) VALUES ('Test that escaping a backslash and a character \\\a works');
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "test_table"
+    And the "test_table" should contain a row with name "Test that escaping a backslash \\ works"
+    And the "test_table" should contain a row with name "Test that escaping multiple backslashes \\\\\\ works"
+    And the "test_table" should contain a row with name "Test that escaping a character \a works"
+    And the "test_table" should contain a row with name "Test that escaping a backslash followed by a character \\a works"
+    And the "test_table" should contain a row with name "Test that escaping a backslash and a character \\\a works"

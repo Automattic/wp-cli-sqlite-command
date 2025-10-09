@@ -102,8 +102,16 @@ class Import {
 			for ( $i = 0; $i < $strlen; $i++ ) {
 				$ch = $line[ $i ];
 
-				// Handle escaped characters
-				if ( $i > 0 && '\\' === $line[ $i - 1 ] ) {
+				// Count preceding backslashes.
+				$slashes = 0;
+				while ( $slashes < $i && '\\' === $line[ $i - $slashes - 1 ] ) {
+					++$slashes;
+				}
+
+				// Handle escaped characters.
+				// A characters is escaped only when the number of preceding backslashes
+				// is odd - "\" is an escape sequence, "\\" is an escaped backslash.
+				if ( 1 === $slashes % 2 ) {
 					$buffer .= $ch;
 					continue;
 				}
