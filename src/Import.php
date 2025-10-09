@@ -80,6 +80,12 @@ class Import {
 
 		// phpcs:ignore
 		while ( ( $line = fgets( $handle ) ) !== false ) {
+			// Detect and convert encoding to UTF-8
+			$detected_encoding = mb_detect_encoding( $line, mb_list_encodings(), true );
+			if ( $detected_encoding && 'UTF-8' !== $detected_encoding ) {
+				$line = mb_convert_encoding( $line, 'UTF-8', $detected_encoding );
+			}
+
 			$line = trim( $line );
 
 			// Skip empty lines and comments
