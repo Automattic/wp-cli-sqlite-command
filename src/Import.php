@@ -139,7 +139,10 @@ class Import {
 
 				// Process statement end
 				if ( ';' === $ch && null === $starting_quote ) {
-					yield trim( $buffer );
+					$buffer = trim( $buffer );
+					if ( ! empty( $buffer ) ) {
+						yield $buffer;
+					}
 					$buffer = '';
 				} else {
 					$buffer .= $ch;
@@ -148,8 +151,9 @@ class Import {
 		}
 
 		// Handle any remaining buffer content
+		$buffer = trim( $buffer );
 		if ( ! empty( $buffer ) ) {
-			yield trim( $buffer );
+			yield $buffer;
 		}
 
 		fclose( $handle );

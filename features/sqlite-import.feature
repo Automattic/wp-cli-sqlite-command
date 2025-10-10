@@ -151,3 +151,23 @@ Feature: WP-CLI SQLite Import Command
       """
 
     And the SQLite database should contain a table named "a'strange`identifier\name"
+
+  @require-sqlite
+  Scenario: Import a file with whitespace and empty lines
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
+
+
+      INSERT INTO test_table (name) VALUES ('Test Name');
+
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+
+    And the SQLite database should contain a table named "test_table"
+    And the "test_table" should contain a row with name "Test Name"
