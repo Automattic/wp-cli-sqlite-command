@@ -51,10 +51,21 @@ class Import {
 	 */
 	protected function execute_statements( $import_file ) {
 		foreach ( $this->parse_statements( $import_file ) as $statement ) {
-			$result = $this->driver->query( $statement );
-			if ( false === $result ) {
-				WP_CLI::warning( 'Could not execute statement: ' . $statement );
-				echo $this->driver->get_error_message();
+			try {
+				$this->driver->query( $statement );
+			} catch ( Exception $e ) {
+				try {
+					// Try converting encoding and retry
+					$detected_encoding = mb_detect_encoding( $statement, mb_list_encodings(), true );
+					if ( $detected_encoding && 'UTF-8' !== $detected_encoding ) {
+						$converted_statement = mb_convert_encoding( $statement, 'UTF-8', $detected_encoding );
+						echo 'Converted ecoding for statement: ' . $converted_statement . PHP_EOL;
+						$this->driver->query( $converted_statement );
+					}
+				} catch ( Exception $e ) {
+					WP_CLI::warning( 'Could not execute statement: ' . $statement );
+					echo $e->getMessage();
+				}
 			}
 		}
 	}
@@ -73,52 +84,70 @@ class Import {
 			WP_CLI::error( "Unable to open file: $sql_file_path" );
 		}
 
-		$single_quotes = 0;
-		$double_quotes = 0;
-		$in_comment    = false;
-		$buffer        = '';
+		$starting_quote = null;
+		$in_comment     = false;
+		$buffer         = '';
 
 		// phpcs:ignore
 		while ( ( $line = fgets( $handle ) ) !== false ) {
-			$line = trim( $line );
-
-			// Skip empty lines and comments
-			if ( empty( $line ) || strpos( $line, '--' ) === 0 || strpos( $line, '#' ) === 0 ) {
-				continue;
-			}
-
-			// Handle multi-line comments
-			if ( ! $in_comment && strpos( $line, '/*' ) === 0 ) {
-				$in_comment = true;
-			}
-			if ( $in_comment ) {
-				if ( strpos( $line, '*/' ) !== false ) {
-					$in_comment = false;
-				}
-				continue;
-			}
-
 			$strlen = strlen( $line );
 			for ( $i = 0; $i < $strlen; $i++ ) {
 				$ch = $line[ $i ];
 
-				// Handle escaped characters
-				if ( $i > 0 && '\\' === $line[ $i - 1 ] ) {
-					$buffer .= $ch;
-					continue;
+				// Handle escape sequences in single and double quoted strings.
+				// TODO: Support NO_BACKSLASH_ESCAPES SQL mode.
+				if ( "'" === $ch || '"' === $ch ) {
+					// Count preceding backslashes.
+					$slashes = 0;
+					while ( $slashes < $i && '\\' === $line[ $i - $slashes - 1 ] ) {
+						++$slashes;
+					}
+
+					// Handle escaped characters.
+					// A characters is escaped only when the number of preceding backslashes
+					// is odd - "\" is an escape sequence, "\\" is an escaped backslash.
+					if ( 1 === $slashes % 2 ) {
+						$buffer .= $ch;
+						continue;
+					}
+				}
+
+				// Handle comments.
+				if ( null === $starting_quote ) {
+					$prev_ch = isset( $line[ $i - 1 ] ) ? $line[ $i - 1 ] : null;
+					$next_ch = isset( $line[ $i + 1 ] ) ? $line[ $i + 1 ] : null;
+
+					// Skip inline comments.
+					if ( ( '-' === $ch && '-' === $next_ch ) || '#' === $ch ) {
+						break; // Stop for the current line.
+					}
+
+					// Skip multi-line comments.
+					if ( ! $in_comment && '/' === $ch && '*' === $next_ch ) {
+						$in_comment = true;
+						continue;
+					}
+					if ( $in_comment ) {
+						if ( '*' === $prev_ch && '/' === $ch ) {
+							$in_comment = false;
+						}
+						continue;
+					}
 				}
 
 				// Handle quotes
-				if ( "'" === $ch && 0 === $double_quotes ) {
-					$single_quotes = 1 - $single_quotes;
-				}
-				if ( '"' === $ch && 0 === $single_quotes ) {
-					$double_quotes = 1 - $double_quotes;
+				if ( null === $starting_quote && ( "'" === $ch || '"' === $ch || '`' === $ch ) ) {
+					$starting_quote = $ch;
+				} elseif ( null !== $starting_quote && $ch === $starting_quote ) {
+					$starting_quote = null;
 				}
 
 				// Process statement end
-				if ( ';' === $ch && 0 === $single_quotes && 0 === $double_quotes ) {
-					yield trim( $buffer );
+				if ( ';' === $ch && null === $starting_quote ) {
+					$buffer = trim( $buffer );
+					if ( ! empty( $buffer ) ) {
+						yield $buffer;
+					}
 					$buffer = '';
 				} else {
 					$buffer .= $ch;
@@ -127,8 +156,9 @@ class Import {
 		}
 
 		// Handle any remaining buffer content
+		$buffer = trim( $buffer );
 		if ( ! empty( $buffer ) ) {
-			yield trim( $buffer );
+			yield $buffer;
 		}
 
 		fclose( $handle );

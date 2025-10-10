@@ -25,7 +25,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 */
 	public function theSqliteDatabaseShouldContainATableNamed( $table_name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table' AND name='$table_name'" );
+		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table' AND name='" . $this->db->escapeString( $table_name ) . "'" );
 		$row    = $result->fetchArray();
 		if ( ! $row ) {
 			throw new Exception( "Table '$table_name' not found in the database." );
@@ -34,10 +34,11 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	/**
 	 * @Then /^the "([^"]*)" should contain a row with name "([^"]*)"$/
+	 * @Then /^the "([^"]*)" should contain a row with name:$/
 	 */
 	public function theTableShouldContainARowWithName( $table_name, $name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT * FROM $table_name WHERE name='$name'" );
+		$result = $this->db->query( "SELECT * FROM $table_name WHERE name='" . $this->db->escapeString( $name ) . "'" );
 		$row    = $result->fetchArray();
 		if ( ! $row ) {
 			throw new Exception( "Row with name '$name' not found in table '$table_name'." );
