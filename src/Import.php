@@ -51,10 +51,21 @@ class Import {
 	 */
 	protected function execute_statements( $import_file ) {
 		foreach ( $this->parse_statements( $import_file ) as $statement ) {
-			$result = $this->driver->query( $statement );
-			if ( false === $result ) {
-				WP_CLI::warning( 'Could not execute statement: ' . $statement );
-				echo $this->driver->get_error_message();
+			try {
+				$this->driver->query( $statement );
+			} catch ( Exception $e ) {
+				try {
+					// Try converting encoding and retry
+					$detected_encoding = mb_detect_encoding( $statement, mb_list_encodings(), true );
+					if ( $detected_encoding && 'UTF-8' !== $detected_encoding ) {
+						$converted_statement = mb_convert_encoding( $statement, 'UTF-8', $detected_encoding );
+						echo 'Converted ecoding for statement: ' . $converted_statement . PHP_EOL;
+						$this->driver->query( $converted_statement );
+					}
+				} catch ( Exception $e ) {
+					WP_CLI::warning( 'Could not execute statement: ' . $statement );
+					echo $e->getMessage();
+				}
 			}
 		}
 	}
@@ -79,12 +90,6 @@ class Import {
 
 		// phpcs:ignore
 		while ( ( $line = fgets( $handle ) ) !== false ) {
-			// Detect and convert encoding to UTF-8
-			$detected_encoding = mb_detect_encoding( $line, mb_list_encodings(), true );
-			if ( $detected_encoding && 'UTF-8' !== $detected_encoding ) {
-				$line = mb_convert_encoding( $line, 'UTF-8', $detected_encoding );
-			}
-
 			$strlen = strlen( $line );
 			for ( $i = 0; $i < $strlen; $i++ ) {
 				$ch = $line[ $i ];
