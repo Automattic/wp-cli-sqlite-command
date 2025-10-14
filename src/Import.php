@@ -62,7 +62,7 @@ class Import {
 						echo 'Converted ecoding for statement: ' . $converted_statement . PHP_EOL;
 						$this->driver->query( $converted_statement );
 					} else {
-						// It's not a encoding issue, so rethrow the exception.
+						// It's not an encoding issue, so rethrow the exception.
 						throw $e;
 					}
 				} catch ( Exception $e ) {
