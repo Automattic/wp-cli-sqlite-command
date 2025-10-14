@@ -61,6 +61,9 @@ class Import {
 						$converted_statement = mb_convert_encoding( $statement, 'UTF-8', $detected_encoding );
 						echo 'Converted ecoding for statement: ' . $converted_statement . PHP_EOL;
 						$this->driver->query( $converted_statement );
+					} else {
+						// It's not a encoding issue, so rethrow the exception.
+						throw $e;
 					}
 				} catch ( Exception $e ) {
 					WP_CLI::warning( 'Could not execute statement: ' . $statement );
