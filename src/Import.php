@@ -35,7 +35,25 @@ class Import {
 		$is_stdin    = '-' === $sql_file_path;
 		$import_file = $is_stdin ? 'php://stdin' : $sql_file_path;
 
+		/*
+		 * Set default SQL mode and other options as per the "mysqldump" command.
+		 *
+		 * This ensures that backups that don't specify SQL modes or other options
+		 * will be imported successfully. Backups that explicitly set any of these
+		 * options will override the default values.
+		 *
+		 * See also WP-CLI's "db import" command SQL mode handling:
+		 *   https://github.com/wp-cli/db-command/blob/abeefa5a6c472f12716c5fa5c5a7394d3d0b1ef2/src/DB_Command.php#L823
+		 */
+		$this->driver->query( "SET @BACKUP_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'" );
+		$this->driver->query( 'SET @BACKUP_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0' );
+		$this->driver->query( 'SET @BACKUP_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0' );
+
 		$this->execute_statements( $import_file );
+
+		$this->driver->query( 'SET SQL_MODE=@BACKUP_SQL_MODE' );
+		$this->driver->query( 'SET UNIQUE_CHECKS=@BACKUP_UNIQUE_CHECKS' );
+		$this->driver->query( 'SET FOREIGN_KEY_CHECKS=@BACKUP_FOREIGN_KEY_CHECKS' );
 
 		$imported_from = $is_stdin ? 'STDIN' : $sql_file_path;
 		WP_CLI::success( sprintf( "Imported from '%s'.", $imported_from ) );

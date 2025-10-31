@@ -171,3 +171,23 @@ Feature: WP-CLI SQLite Import Command
 
     And the SQLite database should contain a table named "test_table"
     And the "test_table" should contain a row with name "Test Name"
+
+  @require-sqlite
+  Scenario: Import data that expect non-strict SQL mode to be set
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (
+        id INTEGER,
+        name TEXT NOT NULL,
+        created_at DATETIME DEFAULT '0000-00-00 00:00:00'
+      );
+      INSERT INTO test_table (id) VALUES (1);
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+
+    And the SQLite database should contain a table named "test_table"
+    And the "test_table" should contain a row with name ""
