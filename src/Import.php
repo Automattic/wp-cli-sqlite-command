@@ -84,8 +84,7 @@ class Import {
 						throw $e;
 					}
 				} catch ( Exception $e ) {
-					WP_CLI::error( 'Could not execute statement: ' . $statement );
-					echo $e->getMessage();
+					WP_CLI::error( 'Could not execute statement: ' . $statement . '. Error: ' . $e->getMessage() );
 				}
 			}
 		}
