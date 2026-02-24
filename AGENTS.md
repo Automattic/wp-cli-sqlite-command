@@ -112,7 +112,7 @@ Runs lint, phpcs, phpunit, and behat sequentially.
 ## Common Pitfalls
 
 - **MUST load the SQLite plugin first:** All database operations require `SQLiteDatabaseIntegrationLoader::load_plugin()` to be called before creating a driver. The driver depends on classes from the WordPress SQLite Database Integration plugin.
-- **Two driver APIs:** The legacy `WP_SQLite_Translator` and new `WP_SQLite_Driver` (AST) have different class names. Use `SQLiteDriverFactory::create_driver()` to get the correct one,do not instantiate drivers directly.
+- **Two driver APIs:** The legacy `WP_SQLite_Translator` and new `WP_SQLite_Driver` (AST) have different class names. Use `SQLiteDriverFactory::create_driver()` to get the correct one, do not instantiate drivers directly.
 - **SQL parser edge cases:** The `Import::parse_statements()` method handles escape sequences, nested quotes, and multi-line comments manually. Changes to this parser MUST be tested with the existing Behat scenarios in `features/sqlite-import.feature`.
 - **Encoding handling:** Import attempts UTF-8 conversion as a fallback when queries fail. This is intentional error recovery, not a bug.
 - **`@when after_wp_config_load`:** All command methods use this WP-CLI hook annotation. New commands MUST include it to ensure WordPress config is loaded before execution.
