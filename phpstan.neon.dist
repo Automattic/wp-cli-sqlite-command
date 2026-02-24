@@ -1,0 +1,17 @@
+includes:
+  - phpstan-baseline.neon
+
+parameters:
+  level: 9
+  paths:
+    - src
+    - command.php
+  scanDirectories:
+    - vendor/wp-cli/wp-cli/php
+  scanFiles:
+    - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+  treatPhpDocTypesAsCertain: false
+  ignoreErrors:
+    - identifier: missingType.iterableValue
+    - identifier: missingType.parameter
+    - identifier: missingType.return

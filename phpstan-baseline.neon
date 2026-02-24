@@ -1,0 +1,241 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Binary operation "\." between mixed and "\\n"\|"\\r\\n" results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Export.php
+
+		-
+			message: '#^Call to method get_connection\(\) on an unknown class WP_SQLite_Driver\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Export.php
+
+		-
+			message: '#^Call to method get_pdo\(\) on an unknown class WP_SQLite_Translator\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class WP_SQLite_Driver\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Export.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class WP_SQLite_Translator\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Export.php
+
+		-
+			message: '#^Class WP_SQLite_Driver not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Class WP_SQLite_Translator not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Parameter \#1 \$handle of method Automattic\\WP_CLI\\SQLite\\Export\:\:write_sql_statements\(\) expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of function in_array expects array, array\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Export\:\:\$args has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Export\:\:\$driver has unknown class WP_SQLite_Driver as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Export\:\:\$driver has unknown class WP_SQLite_Translator as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Export\:\:\$is_stdout has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Export.php
+
+		-
+			message: '#^Binary operation "\." between ''Converted ecoding…'' and array\|string\|false results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Binary operation "\." between ''Could not execute…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class Automattic\\WP_CLI\\SQLite\\WP_SQLite_Driver\.$#'
+			identifier: class.notFound
+			count: 8
+			path: src/Import.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class WP_SQLite_Translator\.$#'
+			identifier: class.notFound
+			count: 8
+			path: src/Import.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fclose expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fgets expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Parameter \#1 \$string of function mb_convert_encoding expects array\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Parameter \#1 \$string of function mb_detect_encoding expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Import\:\:\$args has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Import\:\:\$driver \(Automattic\\WP_CLI\\SQLite\\WP_SQLite_Driver\|WP_SQLite_Translator\) does not accept WP_SQLite_Driver\|WP_SQLite_Translator\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Import\:\:\$driver has unknown class Automattic\\WP_CLI\\SQLite\\WP_SQLite_Driver as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Import\:\:\$driver has unknown class WP_SQLite_Translator as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Import.php
+
+		-
+			message: '#^Parameter \#1 \$version1 of function version_compare expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SQLiteDatabaseIntegrationLoader.php
+
+		-
+			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/SQLiteDatabaseIntegrationLoader.php
+
+		-
+			message: '#^Constant FQDB not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Instantiated class WP_SQLite_Connection not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Instantiated class WP_SQLite_Driver not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Instantiated class WP_SQLite_Translator not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Method Automattic\\WP_CLI\\SQLite\\SQLiteDriverFactory\:\:create_driver\(\) has invalid return type WP_SQLite_Driver\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Method Automattic\\WP_CLI\\SQLite\\SQLiteDriverFactory\:\:create_driver\(\) has invalid return type WP_SQLite_Translator\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/SQLiteDriverFactory.php
+
+		-
+			message: '#^Parameter \#1 \$string of function md5 expects string, int\<0, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SQLite_Command.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class WP_SQLite_Driver\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Tables.php
+
+		-
+			message: '#^Call to method query\(\) on an unknown class WP_SQLite_Translator\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Tables.php
+
+		-
+			message: '#^Class WP_SQLite_Translator not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$message of static method WP_CLI\:\:line\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Tables.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Tables\:\:\$driver has unknown class WP_SQLite_Driver as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Tables.php
+
+		-
+			message: '#^Property Automattic\\WP_CLI\\SQLite\\Tables\:\:\$driver has unknown class WP_SQLite_Translator as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Tables.php
