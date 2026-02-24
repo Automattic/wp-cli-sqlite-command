@@ -1,0 +1,15 @@
+parameters:
+  level: 0
+  paths:
+    - src
+    - command.php
+  scanDirectories:
+    - vendor/wp-cli/wp-cli/php
+  scanFiles:
+    - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+    - phpstan/stubs.php
+  treatPhpDocTypesAsCertain: false
+  dynamicConstantNames:
+    - WP_DEBUG
+    - WP_DEBUG_LOG
+    - WP_DEBUG_DISPLAY
