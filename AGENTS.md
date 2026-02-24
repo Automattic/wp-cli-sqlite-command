@@ -1,6 +1,6 @@
 # wp-cli-sqlite-command
 
-WP-CLI package for importing and exporting SQLite databases.
+WP-CLI package for importing and exporting SQLite databases, used by WordPress Studio to power the Import, Export, and Sync features.
 
 ## SQLiteCommands
 
