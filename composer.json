@@ -28,8 +28,9 @@
     "wp-cli/wp-cli": "^2.5"
   },
   "require-dev": {
-    "wp-cli/wp-cli-tests": "^4.3.2",
-    "phpcompatibility/php-compatibility": "dev-develop"
+    "wp-cli/wp-cli-tests": "^5.0",
+    "phpcompatibility/php-compatibility": "^10.0@alpha",
+    "wp-coding-standards/wpcs": "@dev"
   },
   "scripts": {
     "behat": "run-behat-tests",
@@ -37,6 +38,7 @@
     "lint": "run-linter-tests",
     "phpcs": "run-phpcs-tests",
     "phpcbf": "run-phpcbf-cleanup",
+    "phpstan": "run-phpstan-tests",
     "phpunit": "run-php-unit-tests",
     "prepare-tests": "install-package-tests",
     "test": [
@@ -48,7 +50,8 @@
   },
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
     }
   }
 }
