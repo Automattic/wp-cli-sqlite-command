@@ -134,6 +134,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * options:
 	 *   - list
 	 *   - csv
+	 *   - json
 	 * ---
 	 *
 	 * [--enable-ast-driver]
