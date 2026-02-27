@@ -10,3 +10,4 @@ phpunit.xml
 phpcs.xml
 *.log
 .idea/
+.claude/
