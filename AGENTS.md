@@ -47,7 +47,6 @@ command.php          # Entry point, registers the `wp sqlite` CLI command
 src/                 # Core classes: SQLite_Command, Import, Export, Tables
 features/            # Behat BDD test scenarios (.feature files)
 features/bootstrap/  # Behat step definitions (SQLiteFeatureContext)
-manual_wp_test/      # Manual testing utilities
 ```
 
 ## Validation
