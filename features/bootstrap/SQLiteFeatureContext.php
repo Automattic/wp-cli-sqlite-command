@@ -3,7 +3,6 @@
 namespace Automattic\WP_CLI\SQLite;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\PyStringNode;
 use WP_CLI\Tests\Context\FeatureContext as WPCLIFeatureContext;
 use SQLite3;
