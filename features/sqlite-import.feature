@@ -191,3 +191,24 @@ Feature: WP-CLI SQLite Import Command
 
     And the SQLite database should contain a table named "test_table"
     And the "test_table" should contain a row with name ""
+
+  @require-sqlite
+  Scenario: Import tables with foreign key constraints when child table is imported before parent
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE wp_aa_child (
+        id INTEGER PRIMARY KEY,
+        parent_id INTEGER NOT NULL,
+        CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES wp_zz_parent(id)
+      );
+      INSERT INTO wp_aa_child (id, parent_id) VALUES (1, 1);
+      CREATE TABLE wp_zz_parent (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+      INSERT INTO wp_zz_parent (id, name) VALUES (1, 'Parent Row');
+      """
+    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "wp_zz_parent"
+    And the SQLite database should contain a table named "wp_aa_child"

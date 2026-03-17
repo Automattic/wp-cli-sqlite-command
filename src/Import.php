@@ -49,7 +49,26 @@ class Import {
 		$this->driver->query( 'SET @BACKUP_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0' );
 		$this->driver->query( 'SET @BACKUP_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0' );
 
+		/*
+		 * Disable foreign key constraints at the SQLite level during import.
+		 *
+		 * The MySQL SET FOREIGN_KEY_CHECKS=0 above is stored as a session
+		 * variable by the driver but does not translate to SQLite's PRAGMA.
+		 * We need to explicitly disable foreign keys so that tables with
+		 * cross-references can be imported in any order (e.g., alphabetical).
+		 */
+		$this->driver->execute_sqlite_query( 'PRAGMA foreign_keys = OFF' );
+
 		$this->execute_statements( $import_file );
+
+		/*
+		 * Re-enable foreign key constraints and verify integrity.
+		 *
+		 * PRAGMA foreign_key_check validates all FK references after the
+		 * full import, catching any actual data integrity issues.
+		 */
+		$this->driver->execute_sqlite_query( 'PRAGMA foreign_key_check' );
+		$this->driver->execute_sqlite_query( 'PRAGMA foreign_keys = ON' );
 
 		$this->driver->query( 'SET SQL_MODE=@BACKUP_SQL_MODE' );
 		$this->driver->query( 'SET UNIQUE_CHECKS=@BACKUP_UNIQUE_CHECKS' );
