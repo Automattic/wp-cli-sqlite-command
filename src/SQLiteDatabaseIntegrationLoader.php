@@ -83,7 +83,11 @@ final class SQLiteDatabaseIntegrationLoader {
 		}
 
 		// We also need to selectively load the necessary classes from the plugin.
-		require_once $plugin_directory . '/php-polyfills.php';
+		// In v2.2.22+, php-polyfills.php moved to wp-includes/database/php-polyfills.php.
+		$polyfills_path = file_exists( $plugin_directory . '/wp-includes/database/php-polyfills.php' )
+			? $plugin_directory . '/wp-includes/database/php-polyfills.php'
+			: $plugin_directory . '/php-polyfills.php';
+		require_once $polyfills_path;
 		require_once $plugin_directory . '/constants.php';
 
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
