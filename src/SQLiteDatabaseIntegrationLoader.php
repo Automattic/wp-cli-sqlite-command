@@ -104,7 +104,7 @@ final class SQLiteDatabaseIntegrationLoader {
 	 * @param bool   $new_structure    Whether the plugin uses the v2.2.22+ directory structure.
 	 * @return void
 	 */
-	private static function load_ast_driver( string $plugin_directory, bool $new_structure ): void {
+	private static function load_ast_driver( $plugin_directory, $new_structure ) {
 		if ( file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
 			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
 			return;
@@ -122,7 +122,7 @@ final class SQLiteDatabaseIntegrationLoader {
 	 * @param bool   $new_structure    Whether the plugin uses the v2.2.22+ directory structure.
 	 * @return string[]
 	 */
-	private static function get_ast_driver_files( string $plugin_directory, bool $new_structure ): array {
+	private static function get_ast_driver_files( $plugin_directory, $new_structure ) {
 		if ( $new_structure ) {
 			$db = $plugin_directory . '/wp-includes/database';
 			return [
@@ -172,7 +172,7 @@ final class SQLiteDatabaseIntegrationLoader {
 	 * @param string $plugin_directory The plugin directory.
 	 * @return void
 	 */
-	private static function load_legacy_driver( string $plugin_directory ): void {
+	private static function load_legacy_driver( $plugin_directory ) {
 		$sqlite = $plugin_directory . '/wp-includes/sqlite';
 		require_once "$sqlite/class-wp-sqlite-lexer.php";
 		require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
