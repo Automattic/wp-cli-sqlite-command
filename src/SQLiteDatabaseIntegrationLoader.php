@@ -83,17 +83,35 @@ final class SQLiteDatabaseIntegrationLoader {
 		}
 
 		// We also need to selectively load the necessary classes from the plugin.
-		// In v2.2.22+, php-polyfills.php moved to wp-includes/database/php-polyfills.php.
-		$polyfills_path = file_exists( $plugin_directory . '/wp-includes/database/php-polyfills.php' )
+		// In v2.2.22+, files moved into wp-includes/database/ subdirectories.
+		$new_structure = file_exists( $plugin_directory . '/wp-includes/database/php-polyfills.php' );
+
+		require_once $new_structure
 			? $plugin_directory . '/wp-includes/database/php-polyfills.php'
 			: $plugin_directory . '/php-polyfills.php';
-		require_once $polyfills_path;
 		require_once $plugin_directory . '/constants.php';
 
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
 
 		if ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
 			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
+		} elseif ( $new_driver_enabled && $new_structure ) {
+			require_once $plugin_directory . '/wp-includes/database/version.php';
+			require_once $plugin_directory . '/wp-includes/database/parser/class-wp-parser-grammar.php';
+			require_once $plugin_directory . '/wp-includes/database/parser/class-wp-parser.php';
+			require_once $plugin_directory . '/wp-includes/database/parser/class-wp-parser-node.php';
+			require_once $plugin_directory . '/wp-includes/database/parser/class-wp-parser-token.php';
+			require_once $plugin_directory . '/wp-includes/database/mysql/class-wp-mysql-token.php';
+			require_once $plugin_directory . '/wp-includes/database/mysql/class-wp-mysql-lexer.php';
+			require_once $plugin_directory . '/wp-includes/database/mysql/class-wp-mysql-parser.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-pdo-user-defined-functions.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-connection.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-configurator.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-driver.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-driver-exception.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-information-schema-builder.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-information-schema-exception.php';
+			require_once $plugin_directory . '/wp-includes/database/sqlite/class-wp-sqlite-information-schema-reconstructor.php';
 		} elseif ( $new_driver_enabled ) {
 			require_once $plugin_directory . '/version.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-grammar.php';
