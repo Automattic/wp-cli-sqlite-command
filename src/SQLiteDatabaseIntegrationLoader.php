@@ -81,7 +81,7 @@ final class SQLiteDatabaseIntegrationLoader {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		// In v2.2.22+, files moved into wp-includes/database/ subdirectories.
+		// In v2.2.21+, files moved into wp-includes/database/ subdirectories.
 		$new_structure      = file_exists( $plugin_directory . '/wp-includes/database/php-polyfills.php' );
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
 
