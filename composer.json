@@ -23,6 +23,8 @@
       "email": "jeroen.pfeil@automattic.com"
     }
   ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "require": {
     "php": ">=7.4",
     "wp-cli/wp-cli": "^2.13"
