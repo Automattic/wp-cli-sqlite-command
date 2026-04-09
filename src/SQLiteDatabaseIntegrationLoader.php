@@ -76,20 +76,23 @@ final class SQLiteDatabaseIntegrationLoader {
 		if ( version_compare( $sqlite_plugin_version, '2.1.11', '<' ) ) {
 			WP_CLI::error( 'The SQLite integration plugin must be version 2.1.11 or higher.' );
 		}
-
 		// Load the translator class from the plugin.
 		if ( ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		// We also need to selectively load the necessary classes from the plugin.
-		require_once $plugin_directory . '/php-polyfills.php';
-		require_once $plugin_directory . '/constants.php';
-
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
+		$old_structure      = file_exists( $plugin_directory . '/php-polyfills.php' );
+
+		if ( $old_structure ) {
+			require_once $plugin_directory . '/php-polyfills.php';
+		}
+		require_once $plugin_directory . '/constants.php';
 
 		if ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
 			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
+		} elseif ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-includes/database/load.php' ) ) {
+			require_once $plugin_directory . '/wp-includes/database/load.php';
 		} elseif ( $new_driver_enabled ) {
 			require_once $plugin_directory . '/version.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-grammar.php';
@@ -108,11 +111,12 @@ final class SQLiteDatabaseIntegrationLoader {
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-exception.php';
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-reconstructor.php';
 		} else {
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-lexer.php';
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-query-rewriter.php';
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-translator.php';
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-token.php';
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-pdo-user-defined-functions.php';
+			$sqlite = $plugin_directory . '/wp-includes/sqlite';
+			require_once "$sqlite/class-wp-sqlite-lexer.php";
+			require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
+			require_once "$sqlite/class-wp-sqlite-translator.php";
+			require_once "$sqlite/class-wp-sqlite-token.php";
+			require_once "$sqlite/class-wp-sqlite-pdo-user-defined-functions.php";
 		}
 	}
 }

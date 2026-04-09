@@ -3,10 +3,9 @@
 namespace Automattic\WP_CLI\SQLite;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\PyStringNode;
 use WP_CLI\Tests\Context\FeatureContext as WPCLIFeatureContext;
-use SQLite3;
+use PDO;
 use Exception;
 
 class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
@@ -25,8 +24,9 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 */
 	public function theSqliteDatabaseShouldContainATableNamed( $table_name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table' AND name='" . $this->db->escapeString( $table_name ) . "'" );
-		$row    = $result->fetchArray();
+		$stmt = $this->db->prepare( "SELECT name FROM sqlite_master WHERE type='table' AND name=?" );
+		$stmt->execute( [ $table_name ] );
+		$row = $stmt->fetch();
 		if ( ! $row ) {
 			throw new Exception( "Table '$table_name' not found in the database." );
 		}
@@ -38,8 +38,9 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 */
 	public function theTableShouldContainARowWithName( $table_name, $name ) {
 		$this->connectToDatabase();
-		$result = $this->db->query( "SELECT * FROM $table_name WHERE name='" . $this->db->escapeString( $name ) . "'" );
-		$row    = $result->fetchArray();
+		$stmt = $this->db->prepare( "SELECT * FROM $table_name WHERE name=?" );
+		$stmt->execute( [ $name ] );
+		$row = $stmt->fetch();
 		if ( ! $row ) {
 			throw new Exception( "Row with name '$name' not found in table '$table_name'." );
 		}
@@ -51,14 +52,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	public function theSqliteDatabaseShouldContainTheImportedData() {
 		$this->connectToDatabase();
 		$result = $this->db->query( "SELECT name FROM sqlite_master WHERE type='table'" );
-		$tables = [];
-		while ( true ) {
-			$row = $result->fetchArray();
-			if ( false === $row ) {
-				break;
-			}
-			$tables[] = $row['name'];
-		}
+		$tables = $result->fetchAll( PDO::FETCH_COLUMN );
 		if ( empty( $tables ) ) {
 			throw new Exception( 'No tables found in the database after import.' );
 		}
@@ -78,7 +72,8 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 		if ( ! $this->db ) {
 			$run_dir  = $this->variables['RUN_DIR'];
 			$db_file  = $run_dir . '/wp-content/database/.ht.sqlite';
-			$this->db = new SQLite3( $db_file );
+			$this->db = new PDO( 'sqlite:' . $db_file );
+			$this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		}
 	}
 
@@ -105,45 +100,43 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 		file_put_contents( $full_path, $content );
 	}
 
-
-	////
 	/**
 	 * @Given /^the SQLite database contains some sample data$/
 	 */
 	public function theSqliteDatabaseContainsSomeSampleData() {
-						$this->connectToDatabase();
-						$this->db->exec(
-							"
-									INSERT OR REPLACE INTO wp_posts (ID, post_title, post_content, post_type, post_status)
-									VALUES (1, 'Sample Post', 'This is a sample post content.', 'post', 'publish');
-							"
-						);
+		$this->connectToDatabase();
+		$this->db->exec(
+			"
+				INSERT OR REPLACE INTO wp_posts (ID, post_title, post_content, post_type, post_status)
+				VALUES (1, 'Sample Post', 'This is a sample post content.', 'post', 'publish');
+			"
+		);
 
-							// Insert or update sample data in wp_users
-							$this->db->exec(
-								"
-									INSERT OR REPLACE INTO wp_users (ID, user_login, user_pass, user_nicename, user_email)
-									VALUES (1, 'testuser', 'password_hash', 'Test User', 'testuser@example.com');
-							"
-							);
+		// Insert or update sample data in wp_users
+		$this->db->exec(
+			"
+				INSERT OR REPLACE INTO wp_users (ID, user_login, user_pass, user_nicename, user_email)
+				VALUES (1, 'testuser', 'password_hash', 'Test User', 'testuser@example.com');
+			"
+		);
 
-							// Insert or update sample data in wp_options
-							$this->db->exec(
-								"
-									INSERT OR REPLACE INTO wp_options (option_id, option_name, option_value, autoload)
-									VALUES
-									(1, 'siteurl', 'http://example.com', 'yes'),
-									(2, 'blogname', 'Test Blog', 'yes'),
-									(3, 'blogdescription', 'Just another WordPress site', 'yes'),
-									(4, 'users_can_register', '0', 'yes'),
-									(5, 'admin_email', 'admin@example.com', 'yes'),
-									(6, 'start_of_week', '1', 'yes'),
-									(7, 'use_balanceTags', '0', 'yes'),
-									(8, 'use_smilies', '1', 'yes'),
-									(9, 'require_name_email', '1', 'yes'),
-									(10, 'comments_notify', '1', 'yes');
-							"
-							);
+		// Insert or update sample data in wp_options
+		$this->db->exec(
+			"
+				INSERT OR REPLACE INTO wp_options (option_id, option_name, option_value, autoload)
+				VALUES
+				(1, 'siteurl', 'http://example.com', 'yes'),
+				(2, 'blogname', 'Test Blog', 'yes'),
+				(3, 'blogdescription', 'Just another WordPress site', 'yes'),
+				(4, 'users_can_register', '0', 'yes'),
+				(5, 'admin_email', 'admin@example.com', 'yes'),
+				(6, 'start_of_week', '1', 'yes'),
+				(7, 'use_balanceTags', '0', 'yes'),
+				(8, 'use_smilies', '1', 'yes'),
+				(9, 'require_name_email', '1', 'yes'),
+				(10, 'comments_notify', '1', 'yes');
+			"
+		);
 	}
 
 	/**
