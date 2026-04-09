@@ -81,13 +81,12 @@ final class SQLiteDatabaseIntegrationLoader {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		// In v2.2.21+, files moved into wp-includes/database/ subdirectories.
-		$new_structure      = file_exists( $plugin_directory . '/wp-includes/database/php-polyfills.php' );
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
+		$old_structure      = file_exists( $plugin_directory . '/php-polyfills.php' );
 
-		require_once $new_structure
-			? $plugin_directory . '/wp-includes/database/php-polyfills.php'
-			: $plugin_directory . '/php-polyfills.php';
+		if ( $old_structure ) {
+			require_once $plugin_directory . '/php-polyfills.php';
+		}
 		require_once $plugin_directory . '/constants.php';
 
 		if ( $new_driver_enabled ) {
