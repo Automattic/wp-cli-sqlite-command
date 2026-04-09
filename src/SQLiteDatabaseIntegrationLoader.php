@@ -91,93 +91,18 @@ final class SQLiteDatabaseIntegrationLoader {
 		require_once $plugin_directory . '/constants.php';
 
 		if ( $new_driver_enabled ) {
-			self::load_ast_driver( $plugin_directory, $new_structure );
+			if ( file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
+				require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
+			} elseif ( file_exists( $plugin_directory . '/wp-includes/database/load.php' ) ) {
+				require_once $plugin_directory . '/wp-includes/database/load.php';
+			}
 		} else {
-			self::load_legacy_driver( $plugin_directory );
+			$sqlite = $plugin_directory . '/wp-includes/sqlite';
+			require_once "$sqlite/class-wp-sqlite-lexer.php";
+			require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
+			require_once "$sqlite/class-wp-sqlite-translator.php";
+			require_once "$sqlite/class-wp-sqlite-token.php";
+			require_once "$sqlite/class-wp-sqlite-pdo-user-defined-functions.php";
 		}
-	}
-
-	/**
-	 * Load the AST driver classes from the SQLite integration plugin.
-	 *
-	 * @param string $plugin_directory The plugin directory.
-	 * @param bool   $new_structure    Whether the plugin uses the v2.2.22+ directory structure.
-	 * @return void
-	 */
-	private static function load_ast_driver( $plugin_directory, $new_structure ) {
-		if ( file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
-			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
-			return;
-		}
-
-		foreach ( self::get_ast_driver_files( $plugin_directory, $new_structure ) as $file ) {
-			require_once $file;
-		}
-	}
-
-	/**
-	 * Return the list of AST driver files to load based on the plugin directory structure.
-	 *
-	 * @param string $plugin_directory The plugin directory.
-	 * @param bool   $new_structure    Whether the plugin uses the v2.2.22+ directory structure.
-	 * @return string[]
-	 */
-	private static function get_ast_driver_files( $plugin_directory, $new_structure ) {
-		if ( $new_structure ) {
-			$db = $plugin_directory . '/wp-includes/database';
-			return [
-				"$db/version.php",
-				"$db/parser/class-wp-parser-grammar.php",
-				"$db/parser/class-wp-parser.php",
-				"$db/parser/class-wp-parser-node.php",
-				"$db/parser/class-wp-parser-token.php",
-				"$db/mysql/class-wp-mysql-token.php",
-				"$db/mysql/class-wp-mysql-lexer.php",
-				"$db/mysql/class-wp-mysql-parser.php",
-				"$db/sqlite/class-wp-sqlite-pdo-user-defined-functions.php",
-				"$db/sqlite/class-wp-sqlite-connection.php",
-				"$db/sqlite/class-wp-sqlite-configurator.php",
-				"$db/sqlite/class-wp-sqlite-driver.php",
-				"$db/sqlite/class-wp-sqlite-driver-exception.php",
-				"$db/sqlite/class-wp-sqlite-information-schema-builder.php",
-				"$db/sqlite/class-wp-sqlite-information-schema-exception.php",
-				"$db/sqlite/class-wp-sqlite-information-schema-reconstructor.php",
-			];
-		}
-
-		$wp = $plugin_directory . '/wp-includes';
-		return [
-			$plugin_directory . '/version.php',
-			"$wp/parser/class-wp-parser-grammar.php",
-			"$wp/parser/class-wp-parser.php",
-			"$wp/parser/class-wp-parser-node.php",
-			"$wp/parser/class-wp-parser-token.php",
-			"$wp/mysql/class-wp-mysql-token.php",
-			"$wp/mysql/class-wp-mysql-lexer.php",
-			"$wp/mysql/class-wp-mysql-parser.php",
-			"$wp/sqlite/class-wp-sqlite-pdo-user-defined-functions.php",
-			"$wp/sqlite-ast/class-wp-sqlite-connection.php",
-			"$wp/sqlite-ast/class-wp-sqlite-configurator.php",
-			"$wp/sqlite-ast/class-wp-sqlite-driver.php",
-			"$wp/sqlite-ast/class-wp-sqlite-driver-exception.php",
-			"$wp/sqlite-ast/class-wp-sqlite-information-schema-builder.php",
-			"$wp/sqlite-ast/class-wp-sqlite-information-schema-exception.php",
-			"$wp/sqlite-ast/class-wp-sqlite-information-schema-reconstructor.php",
-		];
-	}
-
-	/**
-	 * Load the legacy driver classes from the SQLite integration plugin.
-	 *
-	 * @param string $plugin_directory The plugin directory.
-	 * @return void
-	 */
-	private static function load_legacy_driver( $plugin_directory ) {
-		$sqlite = $plugin_directory . '/wp-includes/sqlite';
-		require_once "$sqlite/class-wp-sqlite-lexer.php";
-		require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
-		require_once "$sqlite/class-wp-sqlite-translator.php";
-		require_once "$sqlite/class-wp-sqlite-token.php";
-		require_once "$sqlite/class-wp-sqlite-pdo-user-defined-functions.php";
 	}
 }
