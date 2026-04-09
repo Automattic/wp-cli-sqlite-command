@@ -25,7 +25,7 @@
   ],
   "require": {
     "php": ">=7.4",
-    "wp-cli/wp-cli": "^2.5"
+    "wp-cli/wp-cli": "^2.13"
   },
   "require-dev": {
     "wp-cli/wp-cli-tests": "^5.0",
