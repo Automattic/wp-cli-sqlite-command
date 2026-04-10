@@ -54,7 +54,7 @@
       "phpstan/extension-installer": true
     },
     "platform": {
-      "php": "8.3"
+      "php": "7.4"
     }
   }
 }
