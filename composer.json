@@ -23,11 +23,9 @@
       "email": "jeroen.pfeil@automattic.com"
     }
   ],
-  "minimum-stability": "dev",
-  "prefer-stable": true,
   "require": {
     "php": ">=7.4",
-    "wp-cli/wp-cli": "^2.13"
+    "wp-cli/wp-cli": "^2.12"
   },
   "require-dev": {
     "wp-cli/wp-cli-tests": "^5.0",
@@ -54,6 +52,9 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
+    },
+    "platform": {
+      "php": "7.4"
     }
   }
 }
