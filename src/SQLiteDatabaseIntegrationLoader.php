@@ -12,28 +12,19 @@ final class SQLiteDatabaseIntegrationLoader {
 	 * @return false|string The version of the SQLite integration plugin or false if not found/activated.
 	 */
 	public static function get_plugin_version() {
-		// Check if there is a db.php file in the wp-content directory.
-		if ( ! file_exists( ABSPATH . '/wp-content/db.php' ) ) {
-			return false;
-		}
-
-		// If the file is found, we need to check that it is the sqlite integration plugin.
-		$plugin_file = file_get_contents( ABSPATH . '/wp-content/db.php' );
-		if ( ! preg_match( '/define\( \'SQLITE_DB_DROPIN_VERSION\', \'([0-9.]+)\' \)/', $plugin_file ) ) {
-			return false;
-		}
-
 		$plugin_path = self::get_plugin_directory();
 		if ( ! $plugin_path ) {
 			return false;
 		}
 
-		// Try to get the version number from readme.txt
-		$plugin_file = file_get_contents( $plugin_path . '/readme.txt' );
+		$version_file = $plugin_path . '/wp-includes/database/version.php';
+		if ( ! file_exists( $version_file ) ) {
+			return false;
+		}
 
-		preg_match( '/^Stable tag:\s*?(.+)$/m', $plugin_file, $matches );
+		require_once $version_file;
 
-		return isset( $matches[1] ) ? trim( $matches[1] ) : false;
+		return defined( 'SQLITE_DRIVER_VERSION' ) ? SQLITE_DRIVER_VERSION : false;
 	}
 
 	/**
@@ -45,6 +36,7 @@ final class SQLiteDatabaseIntegrationLoader {
 		$plugin_folders = [
 			ABSPATH . '/wp-content/plugins/sqlite-database-integration',
 			ABSPATH . '/wp-content/mu-plugins/sqlite-database-integration',
+			'/internal/shared/sqlite-database-integration',
 		];
 
 		foreach ( $plugin_folders as $folder ) {
