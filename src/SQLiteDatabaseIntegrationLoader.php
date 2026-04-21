@@ -12,18 +12,6 @@ final class SQLiteDatabaseIntegrationLoader {
 	 * @return false|string The version of the SQLite integration plugin or false if not found/activated.
 	 */
 	public static function get_plugin_version() {
-		$plugin_path = self::get_plugin_directory();
-		if ( ! $plugin_path ) {
-			return false;
-		}
-
-		$version_file = $plugin_path . '/wp-includes/database/version.php';
-		if ( ! file_exists( $version_file ) ) {
-			return false;
-		}
-
-		require_once $version_file;
-
 		return defined( 'SQLITE_DRIVER_VERSION' ) ? SQLITE_DRIVER_VERSION : false;
 	}
 
@@ -58,19 +46,6 @@ final class SQLiteDatabaseIntegrationLoader {
 		$plugin_directory = self::get_plugin_directory();
 		if ( ! $plugin_directory ) {
 			WP_CLI::error( 'Could not locate the SQLite integration plugin.' );
-		}
-
-		$sqlite_plugin_version = self::get_plugin_version();
-		if ( ! $sqlite_plugin_version ) {
-			WP_CLI::error( 'Could not determine the version of the SQLite integration plugin.' );
-		}
-
-		if ( version_compare( $sqlite_plugin_version, '2.1.11', '<' ) ) {
-			WP_CLI::error( 'The SQLite integration plugin must be version 2.1.11 or higher.' );
-		}
-		// Load the translator class from the plugin.
-		if ( ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
-			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
 		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
@@ -109,6 +84,15 @@ final class SQLiteDatabaseIntegrationLoader {
 			require_once "$sqlite/class-wp-sqlite-translator.php";
 			require_once "$sqlite/class-wp-sqlite-token.php";
 			require_once "$sqlite/class-wp-sqlite-pdo-user-defined-functions.php";
+		}
+
+		$sqlite_plugin_version = self::get_plugin_version();
+		if ( ! $sqlite_plugin_version ) {
+			WP_CLI::error( 'Could not determine the version of the SQLite integration plugin.' );
+		}
+
+		if ( version_compare( $sqlite_plugin_version, '2.2.0', '<' ) ) {
+			WP_CLI::error( 'The SQLite integration plugin must be version 2.2.0 or higher.' );
 		}
 	}
 }
