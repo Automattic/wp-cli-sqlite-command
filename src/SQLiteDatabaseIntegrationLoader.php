@@ -78,6 +78,7 @@ final class SQLiteDatabaseIntegrationLoader {
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-exception.php';
 			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-reconstructor.php';
 		} else {
+			require_once $plugin_directory . '/wp-includes/database/version.php';
 			$sqlite = $plugin_directory . '/wp-includes/sqlite';
 			require_once "$sqlite/class-wp-sqlite-lexer.php";
 			require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
