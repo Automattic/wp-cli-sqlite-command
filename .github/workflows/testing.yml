@@ -12,4 +12,7 @@ jobs:
     uses: wp-cli/.github/.github/workflows/reusable-testing.yml@5a55e811a46f1ac4946dbd337b74ea7f23ebe014 # main
     with:
       minimum-php: "7.4"
-      matrix: '{ "exclude": [{ "os": "windows-latest" }] }'
+      # Exclude windows-latest entirely, and the macos-latest entry whose
+      # PHP 8.5 setup fails (shivammathur/setup-php has no working PHP 8.5
+      # build for macOS yet).
+      matrix: '{ "exclude": [{ "os": "windows-latest" }, { "os": "macos-latest" }] }'
