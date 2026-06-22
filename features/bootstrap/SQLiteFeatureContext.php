@@ -226,6 +226,51 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	}
 
 	/**
+	 * @Given /^the SQLite database contains an option with SQL string escape bytes$/
+	 */
+	public function theSqliteDatabaseContainsAnOptionWithSqlStringEscapeBytes() {
+		$this->connectToDatabase();
+
+		$this->db->exec( "DELETE FROM wp_options WHERE option_name = 'sql-string-escape-bytes'" );
+
+		$stmt = $this->db->prepare(
+			'
+			INSERT INTO wp_options (option_name, option_value, autoload)
+			VALUES (:option_name, :option_value, :autoload)
+			'
+		);
+		$stmt->execute(
+			array(
+				':option_name'  => 'sql-string-escape-bytes',
+				':option_value' => "quote' backslash\\ nul\0 newline\n carriage\r ctrlz\x1a end",
+				':autoload'     => 'yes',
+			)
+		);
+	}
+
+	/**
+	 * @Then /^the SQL string escape bytes should be preserved$/
+	 */
+	public function theSqlStringEscapeBytesShouldBePreserved() {
+		$this->connectToDatabase();
+
+		$stmt = $this->db->prepare( "SELECT option_value FROM wp_options WHERE option_name = 'sql-string-escape-bytes'" );
+		$stmt->execute();
+		$value = $stmt->fetchColumn();
+
+		$expected = "quote' backslash\\ nul\0 newline\n carriage\r ctrlz\x1a end";
+		if ( $expected !== $value ) {
+			throw new Exception(
+				sprintf(
+					"SQL string escape bytes were not preserved.\nExpected hex: %s\nActual hex: %s",
+					bin2hex( $expected ),
+					bin2hex( $value )
+				)
+			);
+		}
+	}
+
+	/**
 	 * @Given /^the SQLite database contains a test table with alphanumeric string hash values$/
 	 */
 	public function theSqliteDatabaseContainsATestTableWithAlphanumericStringHashValues() {

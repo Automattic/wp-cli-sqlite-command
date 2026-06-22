@@ -157,3 +157,23 @@ Feature: WP-CLI SQLite Export Command
       Success: Imported from 'test_export_serialized_settings.sql'.
       """
     And the serialized settings option should preserve the NUL byte and color palette
+
+  @require-sqlite
+  Scenario: Export should escape SQL string special bytes
+    Given the SQLite database contains an option with SQL string escape bytes
+    When I run `wp sqlite export test_export_escape_bytes.sql --tables=wp_options`
+    Then STDOUT should contain:
+      """
+      Success: Export complete. File written to test_export_escape_bytes.sql
+      """
+    And the file "test_export_escape_bytes.sql" should exist
+    And the file "test_export_escape_bytes.sql" should contain:
+      """
+      'sql-string-escape-bytes','quote\' backslash\\ nul\0 newline\n carriage\r ctrlz\Z end','yes'
+      """
+    When I run `wp sqlite --enable-ast-driver import test_export_escape_bytes.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_export_escape_bytes.sql'.
+      """
+    And the SQL string escape bytes should be preserved
