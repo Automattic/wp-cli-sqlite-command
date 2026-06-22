@@ -162,6 +162,70 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	}
 
 	/**
+	 * @Given /^the SQLite database contains a serialized settings option with a NUL byte separator$/
+	 */
+	public function theSqliteDatabaseContainsASerializedSettingsOptionWithANulByteSeparator() {
+		$this->connectToDatabase();
+
+		$serialized_settings = array(
+			'layout'               => 'full-width',
+			'breadcrumb-separator' => "\0" . '0bb',
+			'global-color-palette' => array(
+				'palette' => array(
+					'#ffffff',
+					'#000000',
+					'#0170b9',
+				),
+			),
+		);
+
+		$this->db->exec( "DELETE FROM wp_options WHERE option_name = 'serialized-theme-settings'" );
+
+		$stmt = $this->db->prepare(
+			'
+			INSERT INTO wp_options (option_name, option_value, autoload)
+			VALUES (:option_name, :option_value, :autoload)
+			'
+		);
+		$stmt->execute(
+			array(
+				':option_name'  => 'serialized-theme-settings',
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WordPress options store PHP-serialized values.
+				':option_value' => serialize( $serialized_settings ),
+				':autoload'     => 'yes',
+			)
+		);
+	}
+
+	/**
+	 * @Then /^the serialized settings option should preserve the NUL byte and color palette$/
+	 */
+	public function theSerializedSettingsOptionShouldPreserveTheNulByteAndColorPalette() {
+		$this->connectToDatabase();
+
+		$stmt = $this->db->prepare( "SELECT option_value FROM wp_options WHERE option_name = 'serialized-theme-settings'" );
+		$stmt->execute();
+		$option_value = $stmt->fetchColumn();
+		if ( false === $option_value ) {
+			throw new Exception( 'The serialized settings option was not found.' );
+		}
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Verifies WordPress PHP-serialized option data round-trips.
+		$settings = unserialize( $option_value );
+		if ( ! is_array( $settings ) ) {
+			throw new Exception( 'The serialized settings option did not unserialize to an array.' );
+		}
+
+		if ( "\0" . '0bb' !== $settings['breadcrumb-separator'] ) {
+			throw new Exception( 'The settings breadcrumb separator did not preserve its leading NUL byte.' );
+		}
+
+		if ( ! isset( $settings['global-color-palette']['palette'][2] ) || '#0170b9' !== $settings['global-color-palette']['palette'][2] ) {
+			throw new Exception( 'The settings global color palette was not preserved.' );
+		}
+	}
+
+	/**
 	 * @Given /^the SQLite database contains a test table with alphanumeric string hash values$/
 	 */
 	public function theSqliteDatabaseContainsATestTableWithAlphanumericStringHashValues() {
