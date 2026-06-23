@@ -9,10 +9,12 @@ on:
 
 jobs:
   test:
-    uses: wp-cli/.github/.github/workflows/reusable-testing.yml@5a55e811a46f1ac4946dbd337b74ea7f23ebe014 # main
+    uses: wp-cli/.github/.github/workflows/reusable-testing.yml@4c37c47e01b5d1fe256edf40de33454d8bee37d4 # main
     with:
       minimum-php: "7.4"
-      # Exclude windows-latest entirely, and the macos-latest entry whose
-      # PHP 8.5 setup fails (shivammathur/setup-php has no working PHP 8.5
-      # build for macOS yet).
-      matrix: '{ "exclude": [{ "os": "windows-latest" }, { "os": "macos-latest" }] }'
+      # The macos-latest PHP 8.5 Behat job failed because shivammathur/setup-php
+      # 2.37.1 had no working PHP 8.5 build for macOS. The bump above pulls in
+      # setup-php 2.37.2, which is reported to fix it. The macos-latest exclude
+      # is temporarily commented out to verify the fix in CI.
+      matrix: '{ "exclude": [{ "os": "windows-latest" }] }'
+      # matrix: '{ "exclude": [{ "os": "windows-latest" }, { "os": "macos-latest" }] }'
