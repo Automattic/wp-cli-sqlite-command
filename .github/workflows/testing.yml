@@ -12,9 +12,9 @@ jobs:
     uses: wp-cli/.github/.github/workflows/reusable-testing.yml@4c37c47e01b5d1fe256edf40de33454d8bee37d4 # main
     with:
       minimum-php: "7.4"
-      # The macos-latest PHP 8.5 Behat job failed because shivammathur/setup-php
-      # 2.37.1 had no working PHP 8.5 build for macOS. The bump above pulls in
-      # setup-php 2.37.2, which is reported to fix it. The macos-latest exclude
-      # is temporarily commented out to verify the fix in CI.
+      # The macos-latest PHP 8.5 Behat job used to fail because shivammathur/setup-php
+      # 2.37.1 could not set up PHP 8.5 on macOS (the "Trust brew taps" fix was missing,
+      # so PHP was never installed -> php: command not found). Excluding macos-latest
+      # was a valid workaround under 2.37.1; the bumped wp-cli/.github ref above pulls in
+      # setup-php 2.37.2, which fixes it, so the macOS job runs again.
       matrix: '{ "exclude": [{ "os": "windows-latest" }] }'
-      # matrix: '{ "exclude": [{ "os": "windows-latest" }, { "os": "macos-latest" }] }'
