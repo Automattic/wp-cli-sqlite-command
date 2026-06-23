@@ -133,3 +133,47 @@ Feature: WP-CLI SQLite Export Command
       """
       INSERT INTO `test_export_alphanumeric_string` VALUES (1,123e99);
       """
+
+  @require-sqlite
+  Scenario: Export should preserve serialized settings containing a NUL byte
+    Given the SQLite database contains a serialized settings option with a NUL byte separator
+    When I run `wp sqlite export test_export_serialized_settings.sql --tables=wp_options`
+    Then STDOUT should contain:
+      """
+      Success: Export complete. File written to test_export_serialized_settings.sql
+      """
+    And the file "test_export_serialized_settings.sql" should exist
+    And the file "test_export_serialized_settings.sql" should contain:
+      """
+      breadcrumb-separator";s:4:"\00bb
+      """
+    And the file "test_export_serialized_settings.sql" should contain:
+      """
+      global-color-palette
+      """
+    When I run `wp sqlite --enable-ast-driver import test_export_serialized_settings.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_export_serialized_settings.sql'.
+      """
+    And the serialized settings option should preserve the NUL byte and color palette
+
+  @require-sqlite
+  Scenario: Export should escape SQL string special bytes
+    Given the SQLite database contains an option with SQL string escape bytes
+    When I run `wp sqlite export test_export_escape_bytes.sql --tables=wp_options`
+    Then STDOUT should contain:
+      """
+      Success: Export complete. File written to test_export_escape_bytes.sql
+      """
+    And the file "test_export_escape_bytes.sql" should exist
+    And the file "test_export_escape_bytes.sql" should contain:
+      """
+      'sql-string-escape-bytes','quote\' backslash\\ nul\0 newline\n carriage\r ctrlz\Z end','yes'
+      """
+    When I run `wp sqlite --enable-ast-driver import test_export_escape_bytes.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_export_escape_bytes.sql'.
+      """
+    And the SQL string escape bytes should be preserved

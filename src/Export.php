@@ -257,8 +257,17 @@ class Export {
 	 * @return string
 	 */
 	protected function escape_string( $value ) {
-		$pdo = $this->get_pdo();
-		return addcslashes( $pdo->quote( $value ), "\\\n" );
+		return "'" . strtr(
+			$value,
+			array(
+				"\0"   => '\0',
+				"\n"   => '\n',
+				"\r"   => '\r',
+				"\x1a" => '\Z',
+				'\\'   => '\\\\',
+				"'"    => "\\'",
+			)
+		) . "'";
 	}
 
 	/**
