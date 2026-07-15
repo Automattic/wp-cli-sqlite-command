@@ -81,18 +81,29 @@ final class SQLiteDatabaseIntegrationLoader {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
-		$old_structure      = file_exists( $plugin_directory . '/php-polyfills.php' );
+		$old_structure = file_exists( $plugin_directory . '/php-polyfills.php' );
 
 		if ( $old_structure ) {
 			require_once $plugin_directory . '/php-polyfills.php';
 		}
 		require_once $plugin_directory . '/constants.php';
 
+		$mysql_on_sqlite_class_file  = $plugin_directory . '/wp-includes/database/sqlite/class-wp-mysql-on-sqlite.php';
+		$mysql_on_sqlite_loader_file = $plugin_directory . '/wp-includes/database/load.php';
+
+		// The loader also exists in older plugin releases without WP_MySQL_On_SQLite.
+		// Select the current API automatically only when both files are available;
+		// otherwise use the compatibility paths below.
+		if ( file_exists( $mysql_on_sqlite_class_file ) && file_exists( $mysql_on_sqlite_loader_file ) ) {
+			require_once $mysql_on_sqlite_loader_file;
+			return;
+		}
+
+		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
 		if ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
 			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
-		} elseif ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-includes/database/load.php' ) ) {
-			require_once $plugin_directory . '/wp-includes/database/load.php';
+		} elseif ( $new_driver_enabled && file_exists( $mysql_on_sqlite_loader_file ) ) {
+			require_once $mysql_on_sqlite_loader_file;
 		} elseif ( $new_driver_enabled ) {
 			require_once $plugin_directory . '/version.php';
 			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-grammar.php';

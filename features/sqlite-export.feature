@@ -135,6 +135,30 @@ Feature: WP-CLI SQLite Export Command
       """
 
   @require-sqlite
+  Scenario: Export should quote table names containing backticks
+    Given the SQLite database contains a table with a backtick in its name
+    When I run `wp sqlite --enable-ast-driver export test_export_identifier.sql`
+    Then the file "test_export_identifier.sql" should contain:
+      """
+      DROP TABLE IF EXISTS `test``table`;
+      """
+    And the file "test_export_identifier.sql" should contain:
+      """
+      INSERT INTO `test``table` VALUES (1,'Test value');
+      """
+
+  @require-sqlite
+  Scenario: Export should keep multiline table names inside comments
+    Given the SQLite database contains a table with a comment injection name
+    When I export the table with a comment injection name
+    And I run `wp sqlite --enable-ast-driver import test_export_comment.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_export_comment.sql'.
+      """
+    And the SQLite database should contain a table named "wp_users"
+
+  @require-sqlite
   Scenario: Export should preserve serialized settings containing a NUL byte
     Given the SQLite database contains a serialized settings option with a NUL byte separator
     When I run `wp sqlite export test_export_serialized_settings.sql --tables=wp_options`

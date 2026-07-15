@@ -17,7 +17,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * : The name of the SQL file to import. If '-', then reads from STDIN. If omitted, it will look for '{dbname}.sql'.
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables new AST driver for full MySQL compatibility.
+	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
 	 *
 	 * ## EXAMPLES
 	 *      # Import the database from a file
@@ -65,7 +65,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * : Output filename for the exported database.
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables new AST driver for full MySQL compatibility.
+	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
 	 *
 	 * ## EXAMPLES
 	 *  # Export the database to a file
@@ -138,7 +138,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables new AST driver for full MySQL compatibility.
+	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
 	 *
 	 * ## EXAMPLES
 	 *

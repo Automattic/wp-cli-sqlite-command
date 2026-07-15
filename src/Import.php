@@ -4,13 +4,15 @@ namespace Automattic\WP_CLI\SQLite;
 use Exception;
 use Generator;
 use WP_CLI;
+use WP_MySQL_On_SQLite;
+use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
 class Import {
 	/**
 	 * The SQLite driver instance.
 	 *
-	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 * @var WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
 	 */
 	protected $driver;
 
