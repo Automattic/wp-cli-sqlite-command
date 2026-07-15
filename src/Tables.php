@@ -2,7 +2,9 @@
 
 namespace Automattic\WP_CLI\SQLite;
 
+use PDO;
 use WP_CLI;
+use WP_MySQL_On_SQLite;
 use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
@@ -10,7 +12,7 @@ class Tables {
 	/**
 	 * The SQLite driver instance.
 	 *
-	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 * @var WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
 	 */
 	protected $driver;
 
@@ -27,9 +29,14 @@ class Tables {
 	 */
 	public function run( $assoc_args = [] ) {
 		// Get all tables
-		$tables = array();
-		foreach ( $this->driver->query( 'SHOW TABLES' ) as $row ) {
-			$tables[] = array_values( (array) $row )[0];
+		$result = $this->driver->query( 'SHOW TABLES' );
+		if ( $this->driver instanceof PDO ) {
+			$tables = $result->fetchAll( PDO::FETCH_COLUMN );
+		} else {
+			$tables = array();
+			foreach ( $result as $row ) {
+				$tables[] = array_values( (array) $row )[0];
+			}
 		}
 
 		// With the legacy driver, we need to exclude system tables

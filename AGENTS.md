@@ -11,7 +11,7 @@ Imports a MySQL dump file into the SQLite database. Parses SQL statements using 
 **Parameters:**
 
 - `<file>` (required), Path to the SQL dump file. Use `-` to read from STDIN.
-- `[--enable-ast-driver]` Use the new AST-based `WP_SQLite_Driver` instead of the legacy `WP_SQLite_Translator` for full MySQL compatibility.
+- `[--enable-ast-driver]` Enable the AST driver on older integration plugin releases. The current `WP_MySQL_On_SQLite` API is selected automatically when available.
 
 ### `wp sqlite export [<file>]`
 
@@ -23,7 +23,7 @@ Exports the SQLite database to a MySQL-compatible SQL dump file. Generates `DROP
 - `[--tables=<tables>]` Comma-separated list of tables to include. If omitted, all tables are exported.
 - `[--exclude_tables=<tables>]` Comma-separated list of tables to skip.
 - `[--porcelain]` Output only the filename (for scripting).
-- `[--enable-ast-driver]` Use the new AST-based driver.
+- `[--enable-ast-driver]` Enable the AST driver on older integration plugin releases.
 
 ### `wp sqlite tables`
 
@@ -32,13 +32,13 @@ Lists all user tables in the SQLite database, excluding internal/system tables. 
 **Parameters:**
 
 - `[--format=<format>]` Output format: `list` (default, one table per line), `csv`, or `json`.
-- `[--enable-ast-driver]` Use the new AST-based driver.
+- `[--enable-ast-driver]` Enable the AST driver on older integration plugin releases.
 
 ## Tech Stack
 
 - PHP >=7.4, WP-CLI package (`wp-cli/wp-cli ^2.5`)
 - WordPress SQLite Database Integration plugin, translation layer between MySQL queries and SQLite
-- Two driver modes: legacy `WP_SQLite_Translator` and new AST-based `WP_SQLite_Driver` (via `--enable-ast-driver`)
+- The PDO-based `WP_MySQL_On_SQLite` API is selected automatically when available; `WP_SQLite_Translator` and `WP_SQLite_Driver` remain as compatibility fallbacks for older integration plugin releases
 
 ## Directory Structure
 
@@ -105,13 +105,13 @@ Runs lint, phpcs, phpunit, and behat sequentially.
 - `command.php` is the entry point, it registers `wp sqlite` as a WP-CLI command pointing to `SQLite_Command`
 - `SQLite_Command` delegates to `Import`, `Export`, and `Tables` classes
 - `SQLiteDatabaseIntegrationLoader::load_plugin()` bootstraps the WordPress SQLite Database Integration plugin, which MUST be loaded before any database operations
-- `SQLiteDriverFactory::create_driver()` creates the appropriate driver based on whether the AST driver is enabled
+- `SQLiteDriverFactory::create_driver()` creates the PDO-based `WP_MySQL_On_SQLite` driver when the class is available, with compatibility fallbacks for older integration plugin versions and the legacy translator
 - The import parser (`Import::parse_statements()`) is a streaming SQL parser using PHP generators, it handles quotes, comments, escape sequences, and multi-line statements character by character
 
 ## Common Pitfalls
 
 - **MUST load the SQLite plugin first:** All database operations require `SQLiteDatabaseIntegrationLoader::load_plugin()` to be called before creating a driver. The driver depends on classes from the WordPress SQLite Database Integration plugin.
-- **Two driver APIs:** The legacy `WP_SQLite_Translator` and new `WP_SQLite_Driver` (AST) have different class names. Use `SQLiteDriverFactory::create_driver()` to get the correct one, do not instantiate drivers directly.
+- **Multiple driver APIs:** Always use `SQLiteDriverFactory::create_driver()`. It selects the PDO-based `WP_MySQL_On_SQLite` API when available and preserves compatibility with older AST drivers and the legacy translator.
 - **SQL parser edge cases:** The `Import::parse_statements()` method handles escape sequences, nested quotes, and multi-line comments manually. Changes to this parser MUST be tested with the existing Behat scenarios in `features/sqlite-import.feature`.
 - **Encoding handling:** Import attempts UTF-8 conversion as a fallback when queries fail. This is intentional error recovery, not a bug.
 - **`@when after_wp_config_load`:** All command methods use this WP-CLI hook annotation. New commands MUST include it to ensure WordPress config is loaded before execution.

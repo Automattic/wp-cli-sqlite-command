@@ -11,6 +11,7 @@ use Exception;
 class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	private $db;
+	private $comment_injection_table_name;
 
 	/**
 	 * @Given /^a SQL dump file named "([^"]*)" with content:$/
@@ -107,8 +108,13 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 		$this->connectToDatabase();
 		$this->db->exec(
 			"
-				INSERT OR REPLACE INTO wp_posts (ID, post_title, post_content, post_type, post_status)
-				VALUES (1, 'Sample Post', 'This is a sample post content.', 'post', 'publish');
+				INSERT OR REPLACE INTO wp_posts (
+					ID, post_title, post_content, post_excerpt, to_ping, pinged,
+					post_content_filtered, post_type, post_status
+				)
+				VALUES (
+					1, 'Sample Post', 'This is a sample post content.', '', '', '', '', 'post', 'publish'
+				);
 			"
 		);
 
@@ -274,25 +280,66 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	 * @Given /^the SQLite database contains a test table with alphanumeric string hash values$/
 	 */
 	public function theSqliteDatabaseContainsATestTableWithAlphanumericStringHashValues() {
-		$this->connectToDatabase();
-
-		// Create a test table with hash values that look like scientific notation
-		$this->db->exec( 'DROP TABLE IF EXISTS test_export_alphanumeric_string' );
-		$this->db->exec(
-			'
+		$this->create_file(
+			'test_export_alphanumeric_string_setup.sql',
+			"
+			DROP TABLE IF EXISTS test_export_alphanumeric_string;
 			CREATE TABLE test_export_alphanumeric_string (
 				id INTEGER PRIMARY KEY,
 				hash_value TEXT
-			)
-		'
-		);
-
-		// Insert test data with values that might be mistaken for scientific notation
-		$this->db->exec(
+			);
+			INSERT INTO test_export_alphanumeric_string (id, hash_value) VALUES (1, '123e99');
 			"
-			INSERT INTO test_export_alphanumeric_string (id, hash_value) VALUES
-			(1, '123e99')
-		"
+		);
+		$this->wpcli_tests_invoke_proc(
+			$this->proc( 'wp sqlite import test_export_alphanumeric_string_setup.sql' ),
+			'run'
+		);
+	}
+
+	/**
+	 * @Given /^the SQLite database contains a table with a backtick in its name$/
+	 */
+	public function theSqliteDatabaseContainsATableWithABacktickInItsName() {
+		$this->create_file(
+			'test_export_identifier_setup.sql',
+			"
+			DROP TABLE IF EXISTS `test``table`;
+			CREATE TABLE `test``table` (id INTEGER PRIMARY KEY, value TEXT);
+			INSERT INTO `test``table` (id, value) VALUES (1, 'Test value');
+			"
+		);
+		$this->wpcli_tests_invoke_proc(
+			$this->proc( 'wp sqlite import test_export_identifier_setup.sql' ),
+			'run'
+		);
+	}
+
+	/**
+	 * @Given /^the SQLite database contains a table with a comment injection name$/
+	 */
+	public function theSqliteDatabaseContainsATableWithACommentInjectionName() {
+		$this->connectToDatabase();
+
+		$this->comment_injection_table_name = "safe`\nDROP TABLE IF EXISTS wp_users; --\rtable";
+		$quoted_table_name                  = '"' . str_replace( '"', '""', $this->comment_injection_table_name ) . '"';
+
+		$this->db->exec( "CREATE TABLE $quoted_table_name (id INTEGER PRIMARY KEY, value TEXT)" );
+		$this->db->exec( "INSERT INTO $quoted_table_name (id, value) VALUES (1, 'Test value')" );
+	}
+
+	/**
+	 * @When /^I export the table with a comment injection name$/
+	 */
+	public function iExportTheTableWithACommentInjectionName() {
+		$this->wpcli_tests_invoke_proc(
+			$this->proc(
+				sprintf(
+					'wp sqlite --enable-ast-driver export test_export_comment.sql --tables=%s',
+					escapeshellarg( $this->comment_injection_table_name )
+				)
+			),
+			'run'
 		);
 	}
 }

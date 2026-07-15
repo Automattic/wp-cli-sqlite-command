@@ -4,6 +4,7 @@ namespace Automattic\WP_CLI\SQLite;
 use Exception;
 use PDO;
 use WP_CLI;
+use WP_MySQL_On_SQLite;
 use WP_SQLite_Driver;
 use WP_SQLite_Translator;
 
@@ -11,7 +12,7 @@ class Export {
 	/**
 	 * The SQLite driver instance.
 	 *
-	 * @var WP_SQLite_Driver|WP_SQLite_Translator
+	 * @var WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
 	 */
 	protected $driver;
 
@@ -85,8 +86,7 @@ class Export {
 	protected function write_sql_statements( $handle ) {
 		$include_tables = $this->get_include_tables();
 		$exclude_tables = $this->get_exclude_tables();
-		foreach ( $this->driver->query( 'SHOW TABLES' ) as $row ) {
-			$table_name = array_values( (array) $row )[0];
+		foreach ( $this->get_table_names() as $table_name ) {
 
 			// Skip tables that are not in the include_tables list if the list is defined
 			if ( ! empty( $include_tables ) && ! in_array( $table_name, $include_tables, true ) ) {
@@ -112,6 +112,24 @@ class Export {
 	}
 
 	/**
+	 * Get the database table names.
+	 *
+	 * @return string[]
+	 */
+	protected function get_table_names() {
+		$result = $this->driver->query( 'SHOW TABLES' );
+		if ( $this->driver instanceof PDO ) {
+			return $result->fetchAll( PDO::FETCH_COLUMN );
+		}
+
+		$tables = array();
+		foreach ( $result as $row ) {
+			$tables[] = array_values( (array) $row )[0];
+		}
+		return $tables;
+	}
+
+	/**
 	 * Write the create statement for a table to the output stream.
 	 *
 	 * @param resource $handle
@@ -120,9 +138,10 @@ class Export {
 	 * @throws Exception
 	 */
 	protected function write_create_table_statement( $handle, $table_name ) {
-		$comment = $this->get_dump_comment( sprintf( 'Table structure for table `%s`', $table_name ) );
+		$quoted_table_name = $this->quote_identifier( $table_name );
+		$comment           = $this->get_dump_comment( sprintf( 'Table structure for table %s', $quoted_table_name ) );
 		fwrite( $handle, $comment . PHP_EOL . PHP_EOL );
-		fwrite( $handle, sprintf( 'DROP TABLE IF EXISTS `%s`;', $table_name ) . PHP_EOL );
+		fwrite( $handle, sprintf( 'DROP TABLE IF EXISTS %s;', $quoted_table_name ) . PHP_EOL );
 		fwrite( $handle, $this->get_create_statement( $table_name ) . PHP_EOL );
 	}
 
@@ -140,7 +159,7 @@ class Export {
 			return;
 		}
 
-		$comment = $this->get_dump_comment( sprintf( 'Dumping data for table `%s`', $table_name ) );
+		$comment = $this->get_dump_comment( sprintf( 'Dumping data for table %s', $this->quote_identifier( $table_name ) ) );
 		fwrite( $handle, $comment . PHP_EOL . PHP_EOL );
 		foreach ( $this->get_insert_statements( $table_name ) as $insert_statement ) {
 			fwrite( $handle, $insert_statement . PHP_EOL );
@@ -158,13 +177,14 @@ class Export {
 	 * @throws Exception
 	 */
 	protected function get_create_statement( $table_name ) {
-		$table_name = $this->driver instanceof WP_SQLite_Driver
-			? $this->driver->get_connection()->quote_identifier( $table_name )
-			: $table_name;
+		$create = $this->driver->query( 'SHOW CREATE TABLE ' . $this->quote_identifier( $table_name ) );
+		if ( $this->driver instanceof PDO ) {
+			$sql = $create->fetchColumn( 1 );
+			return rtrim( $sql, ';' ) . ";\n";
+		}
 
-		$create = $this->driver->query( 'SHOW CREATE TABLE ' . $table_name );
-		$sql    = $create[0]->{'Create Table'};
-		$sql    = rtrim( $sql, ';' ); // The old SQLite driver appends a semicolon.
+		$sql = $create[0]->{'Create Table'};
+		$sql = rtrim( $sql, ';' ); // The old SQLite driver appends a semicolon.
 		return $sql . ";\n";
 	}
 
@@ -176,12 +196,11 @@ class Export {
 	 * @return \Generator
 	 */
 	protected function get_insert_statements( $table_name ) {
-		$pdo  = $this->get_pdo();
-		$stmt = $pdo->prepare( 'SELECT * FROM ' . $table_name );
-		$stmt->execute();
+		$quoted_table_name = $this->quote_identifier( $table_name );
+		$stmt              = $this->get_sqlite_pdo()->query( 'SELECT * FROM ' . $quoted_table_name );
 		// phpcs:ignore
 		while ( $row = $stmt->fetch( PDO::FETCH_ASSOC, PDO::FETCH_ORI_NEXT ) ) {
-			yield sprintf( 'INSERT INTO `%1s` VALUES (%2s);', $table_name, $this->escape_values( $pdo, $row ) );
+			yield sprintf( 'INSERT INTO %1s VALUES (%2s);', $quoted_table_name, $this->escape_values( $row ) );
 		}
 	}
 
@@ -228,13 +247,11 @@ class Export {
 	/**
 	 * Escape values for insert statement
 	 *
-	 * @param PDO $pdo
 	 * @param $values
 	 *
 	 * @return string
 	 */
-	protected function escape_values( PDO $pdo, $values ) {
-		// Get a mysql PDO instance
+	protected function escape_values( $values ) {
 		$escaped_values = [];
 		foreach ( $values as $value ) {
 			if ( is_null( $value ) ) {
@@ -278,9 +295,11 @@ class Export {
 	 * @return string
 	 */
 	protected function get_dump_comment( $comment ) {
+		$comment = str_replace( array( "\r\n", "\r" ), "\n", $comment );
+
 		return implode(
 			"\n",
-			array( '--', sprintf( '-- %s', $comment ), '--' )
+			array( '--', sprintf( '-- %s', str_replace( "\n", "\n-- ", $comment ) ), '--' )
 		);
 	}
 
@@ -292,18 +311,27 @@ class Export {
 	 * @return bool
 	 */
 	protected function table_has_records( $table_name ) {
-		$pdo  = $this->get_pdo();
-		$stmt = $pdo->prepare( 'SELECT COUNT(*) FROM ' . $table_name );
-		$stmt->execute();
+		$table_name = $this->quote_identifier( $table_name );
+		$stmt       = $this->get_sqlite_pdo()->query( 'SELECT COUNT(*) FROM ' . $table_name );
 		return $stmt->fetchColumn() > 0;
 	}
 
 	/**
-	 * Get the PDO instance.
+	 * Quote a MySQL identifier.
+	 *
+	 * @param string $identifier Identifier to quote.
+	 * @return string
+	 */
+	protected function quote_identifier( $identifier ) {
+		return '`' . str_replace( '`', '``', $identifier ) . '`';
+	}
+
+	/**
+	 * Get the underlying SQLite PDO instance.
 	 *
 	 * @return PDO
 	 */
-	protected function get_pdo() {
+	protected function get_sqlite_pdo() {
 		if ( $this->driver instanceof WP_SQLite_Translator ) {
 			return $this->driver->get_pdo();
 		}
