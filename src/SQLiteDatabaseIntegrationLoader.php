@@ -73,61 +73,20 @@ final class SQLiteDatabaseIntegrationLoader {
 			WP_CLI::error( 'Could not determine the version of the SQLite integration plugin.' );
 		}
 
-		if ( version_compare( $sqlite_plugin_version, '2.1.11', '<' ) ) {
-			WP_CLI::error( 'The SQLite integration plugin must be version 2.1.11 or higher.' );
+		if ( version_compare( $sqlite_plugin_version, '3.0', '<' ) ) {
+			WP_CLI::error(
+				sprintf(
+					'The SQLite integration plugin must be version 3.0 or higher. Version %s was found. Please update the plugin and try again.',
+					$sqlite_plugin_version
+				)
+			);
 		}
-		// Load the translator class from the plugin.
+
 		if ( ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		$old_structure = file_exists( $plugin_directory . '/php-polyfills.php' );
-
-		if ( $old_structure ) {
-			require_once $plugin_directory . '/php-polyfills.php';
-		}
 		require_once $plugin_directory . '/constants.php';
-
-		$mysql_on_sqlite_class_file  = $plugin_directory . '/wp-includes/database/sqlite/class-wp-mysql-on-sqlite.php';
-		$mysql_on_sqlite_loader_file = $plugin_directory . '/wp-includes/database/load.php';
-
-		// The loader also exists in older plugin releases without WP_MySQL_On_SQLite.
-		// Select the current API automatically only when both files are available;
-		// otherwise use the compatibility paths below.
-		if ( file_exists( $mysql_on_sqlite_class_file ) && file_exists( $mysql_on_sqlite_loader_file ) ) {
-			require_once $mysql_on_sqlite_loader_file;
-			return;
-		}
-
-		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
-		if ( $new_driver_enabled && file_exists( $plugin_directory . '/wp-pdo-mysql-on-sqlite.php' ) ) {
-			require_once $plugin_directory . '/wp-pdo-mysql-on-sqlite.php';
-		} elseif ( $new_driver_enabled && file_exists( $mysql_on_sqlite_loader_file ) ) {
-			require_once $mysql_on_sqlite_loader_file;
-		} elseif ( $new_driver_enabled ) {
-			require_once $plugin_directory . '/version.php';
-			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-grammar.php';
-			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser.php';
-			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-node.php';
-			require_once $plugin_directory . '/wp-includes/parser/class-wp-parser-token.php';
-			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-token.php';
-			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-lexer.php';
-			require_once $plugin_directory . '/wp-includes/mysql/class-wp-mysql-parser.php';
-			require_once $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-pdo-user-defined-functions.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-connection.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-configurator.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-driver.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-driver-exception.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-builder.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-exception.php';
-			require_once $plugin_directory . '/wp-includes/sqlite-ast/class-wp-sqlite-information-schema-reconstructor.php';
-		} else {
-			$sqlite = $plugin_directory . '/wp-includes/sqlite';
-			require_once "$sqlite/class-wp-sqlite-lexer.php";
-			require_once "$sqlite/class-wp-sqlite-query-rewriter.php";
-			require_once "$sqlite/class-wp-sqlite-translator.php";
-			require_once "$sqlite/class-wp-sqlite-token.php";
-			require_once "$sqlite/class-wp-sqlite-pdo-user-defined-functions.php";
-		}
+		require_once $plugin_directory . '/wp-includes/database/load.php';
 	}
 }

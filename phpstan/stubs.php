@@ -20,19 +20,8 @@ class WP_SQLite_Connection {
 	public function get_pdo(): PDO {}
 }
 
-class WP_SQLite_Driver {
-	public function __construct( WP_SQLite_Connection $connection, string $db_name ) {}
-	public function query( string $sql ) {}
-	public function get_connection(): WP_SQLite_Connection {}
-}
-
 // phpcs:ignore WordPress.DB.RestrictedClasses.mysql__PDO -- Stub for the plugin's PDO subclass.
 class WP_MySQL_On_SQLite extends PDO {
 	public function get_connection(): WP_SQLite_Connection {}
-}
-
-class WP_SQLite_Translator {
-	public function __construct() {}
-	public function query( string $sql ) {}
-	public function get_pdo(): PDO {}
+	public function execute_sqlite_query( string $sql, array $params = array() ): PDOStatement {}
 }

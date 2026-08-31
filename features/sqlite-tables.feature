@@ -26,6 +26,18 @@ Feature: WP-CLI SQLite Tables Command
       """
 
   @require-sqlite
+  Scenario: The deprecated --enable-ast-driver option is accepted as a no-op
+    When I try `wp sqlite tables --enable-ast-driver`
+    Then STDERR should contain:
+      """
+      Warning: The --enable-ast-driver option is deprecated and has no effect.
+      """
+    And STDOUT should contain:
+      """
+      wp_users
+      """
+
+  @require-sqlite
   Scenario: Successfully list the tables in the SQLite database in a CSV format
     When I run `wp sqlite tables --format=csv`
     Then STDOUT should contain:

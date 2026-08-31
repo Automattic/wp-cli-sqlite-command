@@ -335,7 +335,7 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 		$this->wpcli_tests_invoke_proc(
 			$this->proc(
 				sprintf(
-					'wp sqlite --enable-ast-driver export test_export_comment.sql --tables=%s',
+					'wp sqlite export test_export_comment.sql --tables=%s',
 					escapeshellarg( $this->comment_injection_table_name )
 				)
 			),

@@ -21,7 +21,7 @@ $ wp sqlite import <file>
 		The path to the MySQL compatible dump file to import. When passing `-` as the file argument, the SQL commands are read from standard input.
 
 	[--enable-ast-driver]
-		Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+		Deprecated. Has no effect; the current driver API is always used.
 
 ### wp sqlite export
 
@@ -46,7 +46,7 @@ $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
 		Output filename for the exported database.
 
 	[--enable-ast-driver]
-		Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+		Deprecated. Has no effect; the current driver API is always used.
 
 ### wp sqlite tables
 
@@ -68,7 +68,7 @@ $ wp sqlite tables [--format=<list|csv>]
 		---
 
 	[--enable-ast-driver]
-		Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+		Deprecated. Has no effect; the current driver API is always used.
 
 **EXAMPLES**
 
