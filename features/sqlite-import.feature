@@ -56,7 +56,7 @@ Feature: WP-CLI SQLite Import Command
       INSERT INTO test_table (name) VALUES ('Test that escaping a backslash followed by a character \\a works');
       INSERT INTO test_table (name) VALUES ('Test that escaping a backslash and a character \\\a works');
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -76,7 +76,7 @@ Feature: WP-CLI SQLite Import Command
       INSERT INTO test_table (name) VALUES ('Test that a string containing
           a newline character and some whitespace works');
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -103,7 +103,7 @@ Feature: WP-CLI SQLite Import Command
       INSERT INTO test_table (name) VALUES ('fo -- this looks like a comment ur');
       INSERT INTO test_table (name) VALUES ('fi/* this looks like a comment */ve');
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -123,7 +123,7 @@ Feature: WP-CLI SQLite Import Command
       INSERT INTO test_table (name) VALUES ('a single-quoted string with \' '' some " tricky ` chars');
       INSERT INTO test_table (name) VALUES ("a double-quoted string with ' some \" "" tricky ` chars");
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -144,7 +144,7 @@ Feature: WP-CLI SQLite Import Command
       """
       CREATE TABLE `a'strange``identifier\\name` (id INTEGER PRIMARY KEY AUTO_INCREMENT, name TEXT);
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -163,7 +163,7 @@ Feature: WP-CLI SQLite Import Command
       INSERT INTO test_table (name) VALUES ('Test Name');
 
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -183,7 +183,7 @@ Feature: WP-CLI SQLite Import Command
       );
       INSERT INTO test_table (id) VALUES (1);
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
@@ -205,7 +205,7 @@ Feature: WP-CLI SQLite Import Command
       CREATE TABLE wp_zz_parent (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
       INSERT INTO wp_zz_parent (id, name) VALUES (1, 'Parent Row');
       """
-    When I run `wp sqlite --enable-ast-driver import test_import.sql`
+    When I run `wp sqlite import test_import.sql`
     Then STDOUT should contain:
       """
       Success: Imported from 'test_import.sql'.
