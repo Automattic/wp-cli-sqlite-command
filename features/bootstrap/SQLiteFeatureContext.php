@@ -71,8 +71,11 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	private function connectToDatabase() {
 		if ( ! $this->db ) {
-			$run_dir  = $this->variables['RUN_DIR'];
-			$db_file  = $run_dir . '/wp-content/database/.ht.sqlite';
+			$result  = $this->proc( 'wp eval \'echo defined( "DB_PATH" ) ? DB_PATH : FQDB;\'' )->run_check();
+			$db_file = trim( $result->stdout );
+			if ( ! is_file( $db_file ) ) {
+				throw new Exception( 'The WordPress SQLite database does not exist.' );
+			}
 			$this->db = new PDO( 'sqlite:' . $db_file );
 			$this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		}

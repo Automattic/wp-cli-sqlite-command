@@ -34,3 +34,9 @@ class WP_SQLite_Translator {
 	public function query( string $sql ) {}
 	public function get_pdo(): PDO {}
 }
+
+class WP_SQLite_Storage {
+	public static function with_secret_path( string $root ): self {}
+	public function initialize(): string {}
+	private function __construct() {}
+}
