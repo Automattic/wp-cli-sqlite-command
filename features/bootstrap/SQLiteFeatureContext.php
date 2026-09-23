@@ -14,6 +14,60 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	private $comment_injection_table_name;
 
 	/**
+	 * Install WordPress with the integration plugin under test.
+	 *
+	 * @param string $subdir  Installation subdirectory.
+	 * @param string $version WordPress version.
+	 */
+	public function install_wp( $subdir = '', $version = '' ): void {
+		if ( 'sqlite' !== getenv( 'WP_CLI_TEST_DBTYPE' ) ) {
+			parent::install_wp( $subdir, $version );
+			return;
+		}
+
+		// The upstream installation cache copies only the fixed .ht.sqlite path.
+		// Install SQLite sites directly so managed storage is also preserved.
+		$subdir = $this->replace_variables( $subdir );
+		$this->create_run_dir();
+		$this->download_wp( $subdir, $version );
+
+		$plugin_directory = getenv( 'WP_CLI_TEST_SQLITE_PLUGIN_DIR' );
+		if ( $plugin_directory ) {
+			if ( ! is_file( $plugin_directory . '/db.copy' ) ) {
+				throw new Exception( 'WP_CLI_TEST_SQLITE_PLUGIN_DIR must point to an integration plugin directory containing db.copy.' );
+			}
+			$run_dir = $this->variables['RUN_DIR'] . '/' . $subdir;
+			$target  = $run_dir . '/wp-content/mu-plugins/sqlite-database-integration';
+			self::remove_dir( $target );
+			mkdir( $target );
+			// Plugin source checkouts link to the shared driver package.
+			$this->proc( \WP_CLI\Utils\esc_cmd( 'cp -RL %s/. %s', $plugin_directory, $target ) )->run_check();
+			file_put_contents(
+				$run_dir . '/wp-content/db.php',
+				str_replace(
+					[ "'{SQLITE_IMPLEMENTATION_FOLDER_PATH}'", '{SQLITE_PLUGIN}', '/plugins/' ],
+					[ "__DIR__ . '/mu-plugins/sqlite-database-integration'", 'sqlite-database-integration/load.php', '/mu-plugins/' ],
+					file_get_contents( $target . '/db.copy' )
+				)
+			);
+		}
+
+		$this->create_config( $subdir, "define( 'DISABLE_WP_CRON', true );" );
+		$this->proc(
+			'wp core install',
+			[
+				'url'            => 'https://example.com',
+				'title'          => 'WP CLI Site',
+				'admin_user'     => 'admin',
+				'admin_email'    => 'admin@example.com',
+				'admin_password' => 'password1',
+				'skip-email'     => true,
+			],
+			$subdir
+		)->run_check();
+	}
+
+	/**
 	 * @Given /^a SQL dump file named "([^"]*)" with content:$/
 	 */
 	public function aSqlDumpFileNamedWithContent( $filename, PyStringNode $content ) {
@@ -71,8 +125,11 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	private function connectToDatabase() {
 		if ( ! $this->db ) {
-			$run_dir  = $this->variables['RUN_DIR'];
-			$db_file  = $run_dir . '/wp-content/database/.ht.sqlite';
+			$result  = $this->proc( 'wp eval "echo FQDB;"' )->run_check();
+			$db_file = trim( $result->stdout );
+			if ( ! is_file( $db_file ) ) {
+				throw new Exception( 'The WordPress SQLite database does not exist.' );
+			}
 			$this->db = new PDO( 'sqlite:' . $db_file );
 			$this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		}

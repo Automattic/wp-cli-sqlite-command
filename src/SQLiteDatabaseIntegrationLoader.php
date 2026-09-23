@@ -87,6 +87,10 @@ final class SQLiteDatabaseIntegrationLoader {
 			require_once $plugin_directory . '/php-polyfills.php';
 		}
 		require_once $plugin_directory . '/constants.php';
+		$storage_file = $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-storage.php';
+		if ( file_exists( $storage_file ) ) {
+			require_once $storage_file;
+		}
 
 		$mysql_on_sqlite_class_file  = $plugin_directory . '/wp-includes/database/sqlite/class-wp-mysql-on-sqlite.php';
 		$mysql_on_sqlite_loader_file = $plugin_directory . '/wp-includes/database/load.php';
