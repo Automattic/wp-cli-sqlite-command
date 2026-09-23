@@ -8,8 +8,6 @@
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
 // phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
-// phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations
-// phpcs:disable PHPCompatibility.FunctionDeclarations.NewParamTypeDeclarations
 
 class WP_SQLite_Connection {
 	/**
