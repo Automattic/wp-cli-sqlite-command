@@ -20,7 +20,7 @@ class Import {
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->driver = SQLiteDriverFactory::create_driver();
+		$this->driver = SQLiteDriverFactory::create_driver( true );
 	}
 
 	/**
