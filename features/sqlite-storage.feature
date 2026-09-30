@@ -140,3 +140,29 @@ Feature: SQLite database storage
       """
       test_table
       """
+
+  Scenario: Reject an in-memory database
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY);
+      """
+    When I run `wp config set DB_PATH ':memory:'`
+    And I try `wp sqlite import test_import.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      In-memory databases are not supported.
+      """
+    When I try `wp sqlite export backup.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      In-memory databases are not supported.
+      """
+    And the backup.sql file should not exist
+    When I try `wp sqlite tables`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      In-memory databases are not supported.
+      """

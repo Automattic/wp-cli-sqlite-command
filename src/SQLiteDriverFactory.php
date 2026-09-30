@@ -89,6 +89,9 @@ class SQLiteDriverFactory {
 		if ( ! is_string( $database_path ) || '' === $database_path || false !== strpos( $database_path, "\0" ) ) {
 			throw new RuntimeException( 'The SQLite database path is invalid.' );
 		}
+		if ( ':memory:' === $database_path ) {
+			throw new RuntimeException( 'In-memory databases are not supported.' );
+		}
 		return $database_path;
 	}
 }
