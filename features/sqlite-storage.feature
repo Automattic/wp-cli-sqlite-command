@@ -40,6 +40,13 @@ Feature: SQLite database storage
     When I try `wp sqlite tables`
     Then the return code should be 1
     And the wp-content/database directory should not exist
+    When I try `wp sqlite import missing.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      Unable to open file: missing.sql
+      """
+    And the wp-content/database directory should not exist
     When I run `mkdir wp-content/database`
     And I run `wp sqlite import backup.sql`
     Then STDOUT should contain:
@@ -91,6 +98,13 @@ Feature: SQLite database storage
     And the backup.sql file should not exist
     When I try `wp sqlite tables`
     Then the return code should be 1
+    And the new.sqlite file should not exist
+    When I try `wp sqlite import missing.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      Unable to open file: missing.sql
+      """
     And the new.sqlite file should not exist
     When I run `wp sqlite import test_import.sql`
     And I run `wp sqlite tables`
