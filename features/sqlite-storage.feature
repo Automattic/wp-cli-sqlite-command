@@ -166,3 +166,16 @@ Feature: SQLite database storage
       """
       In-memory databases are not supported.
       """
+
+  Scenario: Report a database that cannot be opened
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY);
+      """
+    When I run `wp config set DB_PATH '{RUN_DIR}/missing-directory/database.sqlite'`
+    And I try `wp sqlite import test_import.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      Error: Could not open the SQLite database:
+      """

@@ -29,30 +29,12 @@ class SQLiteDriverFactory {
 			WP_CLI::error( 'The SQLite database does not exist.' );
 		}
 
-		$db_name = defined( 'DB_NAME' ) && '' !== DB_NAME ? DB_NAME : 'database_name_here';
-
-		if ( class_exists( WP_MySQL_On_SQLite::class ) ) {
-			$database_dsn = sprintf(
-				'mysql-on-sqlite:path=%s;dbname=%s',
-				str_replace( ';', ';;', $database_path ),
-				str_replace( ';', ';;', $db_name )
-			);
-			$driver       = new WP_MySQL_On_SQLite( $database_dsn );
-			$driver->setAttribute( PDO::ATTR_STRINGIFY_FETCHES, true );
-			return $driver;
+		try {
+			$driver = self::open_driver( $database_path );
+		} catch ( \Throwable $exception ) {
+			WP_CLI::error( 'Could not open the SQLite database: ' . $exception->getMessage() );
 		}
-
-		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
-		if ( ! $new_driver_enabled ) {
-			return new WP_SQLite_Translator();
-		}
-
-		$connection = new WP_SQLite_Connection(
-			array(
-				'path' => $database_path,
-			)
-		);
-		return new WP_SQLite_Driver( $connection, $db_name );
+		return $driver;
 	}
 
 	/**
@@ -93,5 +75,38 @@ class SQLiteDriverFactory {
 			throw new RuntimeException( 'In-memory databases are not supported.' );
 		}
 		return $database_path;
+	}
+
+	/**
+	 * Open the SQLite driver for a database path.
+	 *
+	 * @param string $database_path The SQLite database path.
+	 * @return WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
+	 */
+	private static function open_driver( $database_path ) {
+		$db_name = defined( 'DB_NAME' ) && '' !== DB_NAME ? DB_NAME : 'database_name_here';
+
+		if ( class_exists( WP_MySQL_On_SQLite::class ) ) {
+			$database_dsn = sprintf(
+				'mysql-on-sqlite:path=%s;dbname=%s',
+				str_replace( ';', ';;', $database_path ),
+				str_replace( ';', ';;', $db_name )
+			);
+			$driver       = new WP_MySQL_On_SQLite( $database_dsn );
+			$driver->setAttribute( PDO::ATTR_STRINGIFY_FETCHES, true );
+			return $driver;
+		}
+
+		$new_driver_enabled = defined( 'WP_SQLITE_AST_DRIVER' ) && WP_SQLITE_AST_DRIVER;
+		if ( ! $new_driver_enabled ) {
+			return new WP_SQLite_Translator();
+		}
+
+		$connection = new WP_SQLite_Connection(
+			array(
+				'path' => $database_path,
+			)
+		);
+		return new WP_SQLite_Driver( $connection, $db_name );
 	}
 }
