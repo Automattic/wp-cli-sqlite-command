@@ -20,7 +20,6 @@ class Import {
 
 	public function __construct() {
 		SQLiteDatabaseIntegrationLoader::load_plugin();
-		$this->driver = SQLiteDriverFactory::create_driver();
 	}
 
 	/**
@@ -36,6 +35,13 @@ class Import {
 
 		$is_stdin    = '-' === $sql_file_path;
 		$import_file = $is_stdin ? 'php://stdin' : $sql_file_path;
+		$handle      = fopen( $import_file, 'r' );
+		if ( ! $handle ) {
+			WP_CLI::error( "Unable to open file: $import_file" );
+		}
+
+		// Create the driver after opening the input, so a missing file doesn't create a database.
+		$this->driver = SQLiteDriverFactory::create_driver( true );
 
 		/*
 		 * Set default SQL mode and other options as per the "mysqldump" command.
@@ -61,7 +67,8 @@ class Import {
 		 */
 		$this->driver->execute_sqlite_query( 'PRAGMA foreign_keys = OFF' );
 
-		$this->execute_statements( $import_file );
+		$this->execute_statements( $handle );
+		fclose( $handle );
 
 		/*
 		 * Re-enable foreign key constraints and verify integrity.
@@ -83,13 +90,13 @@ class Import {
 	/**
 	 * Execute SQL statements from an SQL dump file.
 	 *
-	 * @param $import_file
+	 * @param resource $handle The SQL dump file handle.
 	 *
 	 * @return void
 	 * @throws Exception
 	 */
-	protected function execute_statements( $import_file ) {
-		foreach ( $this->parse_statements( $import_file ) as $statement ) {
+	protected function execute_statements( $handle ) {
+		foreach ( $this->parse_statements( $handle ) as $statement ) {
 			try {
 				$this->driver->query( $statement );
 			} catch ( Exception $e ) {
@@ -114,18 +121,11 @@ class Import {
 
 	/**
 	 * Parse SQL statements from an SQL dump file.
-	 * @param string $sql_file_path The path to the SQL dump file.
+	 * @param resource $handle The SQL dump file handle.
 	 *
 	 * @return Generator A generator that yields SQL statements.
 	 */
-	public function parse_statements( $sql_file_path ) {
-
-		$handle = fopen( $sql_file_path, 'r' );
-
-		if ( ! $handle ) {
-			WP_CLI::error( "Unable to open file: $sql_file_path" );
-		}
-
+	public function parse_statements( $handle ) {
 		$starting_quote = null;
 		$in_comment     = false;
 		$buffer         = '';
@@ -202,7 +202,5 @@ class Import {
 		if ( ! empty( $buffer ) ) {
 			yield $buffer;
 		}
-
-		fclose( $handle );
 	}
 }
