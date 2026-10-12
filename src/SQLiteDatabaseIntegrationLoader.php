@@ -86,7 +86,17 @@ final class SQLiteDatabaseIntegrationLoader {
 			define( 'SQLITE_DB_DROPIN_VERSION', $sqlite_plugin_version ); // phpcs:ignore
 		}
 
-		require_once $plugin_directory . '/constants.php';
+		try {
+			require_once $plugin_directory . '/constants.php';
+		} catch ( \Throwable $exception ) {
+			// Newer plugin releases reject invalid database settings.
+			WP_CLI::error( 'Could not open the SQLite database: ' . $exception->getMessage() );
+		}
+		$storage_file = $plugin_directory . '/wp-includes/sqlite/class-wp-sqlite-storage.php';
+		if ( file_exists( $storage_file ) ) {
+			require_once $storage_file;
+		}
+
 		require_once $plugin_directory . '/wp-includes/database/load.php';
 	}
 }

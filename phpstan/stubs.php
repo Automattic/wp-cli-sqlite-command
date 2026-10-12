@@ -8,8 +8,6 @@
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
 // phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
-// phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations
-// phpcs:disable PHPCompatibility.FunctionDeclarations.NewParamTypeDeclarations
 
 class WP_SQLite_Connection {
 	/**
@@ -24,4 +22,10 @@ class WP_SQLite_Connection {
 class WP_MySQL_On_SQLite extends PDO {
 	public function get_connection(): WP_SQLite_Connection {}
 	public function execute_sqlite_query( string $sql, array $params = array() ): PDOStatement {}
+}
+
+class WP_SQLite_Storage {
+	public static function with_secret_path( string $root ): self {}
+	public function initialize(): string {}
+	private function __construct() {}
 }
