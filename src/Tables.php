@@ -5,14 +5,12 @@ namespace Automattic\WP_CLI\SQLite;
 use PDO;
 use WP_CLI;
 use WP_MySQL_On_SQLite;
-use WP_SQLite_Driver;
-use WP_SQLite_Translator;
 
 class Tables {
 	/**
 	 * The SQLite driver instance.
 	 *
-	 * @var WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
+	 * @var WP_MySQL_On_SQLite
 	 */
 	protected $driver;
 
@@ -30,28 +28,7 @@ class Tables {
 	public function run( $assoc_args = [] ) {
 		// Get all tables
 		$result = $this->driver->query( 'SHOW TABLES' );
-		if ( $this->driver instanceof PDO ) {
-			$tables = $result->fetchAll( PDO::FETCH_COLUMN );
-		} else {
-			$tables = array();
-			foreach ( $result as $row ) {
-				$tables[] = array_values( (array) $row )[0];
-			}
-		}
-
-		// With the legacy driver, we need to exclude system tables
-		// and make sure the table names are alphabetically sorted.
-		if ( $this->driver instanceof WP_SQLite_Translator ) {
-			$tables_to_exclude = array( '_mysql_data_types_cache', 'sqlite_sequence' );
-			foreach ( $tables as $table ) {
-				if ( 0 === strpos( $table, '_wp_sqlite_' ) ) {
-					$tables_to_exclude[] = $table;
-				}
-			}
-
-			$tables = array_values( array_diff( $tables, $tables_to_exclude ) );
-			sort( $tables );
-		}
+		$tables = $result->fetchAll( PDO::FETCH_COLUMN );
 
 		if ( empty( $tables ) ) {
 			WP_CLI::error( 'No tables found in the database.' );

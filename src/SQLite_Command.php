@@ -17,7 +17,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * : The name of the SQL file to import. If '-', then reads from STDIN. If omitted, it will look for '{dbname}.sql'.
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+	 * : Deprecated. Has no effect; the current driver API is always used.
 	 *
 	 * ## EXAMPLES
 	 *      # Import the database from a file
@@ -27,14 +27,8 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when after_wp_config_load
 	 */
 	public function import( $args, $assoc_args ) {
-		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
-
-		if ( $enable_ast_driver ) {
-			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
-				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-				define( 'WP_SQLITE_AST_DRIVER', true );
-				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-			}
+		if ( isset( $assoc_args['enable-ast-driver'] ) ) {
+			WP_CLI::warning( 'The --enable-ast-driver option is deprecated and has no effect.' );
 		}
 
 		if ( empty( $args[0] ) ) {
@@ -65,7 +59,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * : Output filename for the exported database.
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+	 * : Deprecated. Has no effect; the current driver API is always used.
 	 *
 	 * ## EXAMPLES
 	 *  # Export the database to a file
@@ -90,15 +84,9 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when after_wp_config_load
 	 */
 	public function export( $args, $assoc_args ) {
-		$is_porcelain      = isset( $assoc_args['porcelain'] );
-		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
-
-		if ( $enable_ast_driver ) {
-			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
-				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-				define( 'WP_SQLITE_AST_DRIVER', true );
-				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-			}
+		$is_porcelain = isset( $assoc_args['porcelain'] );
+		if ( isset( $assoc_args['enable-ast-driver'] ) ) {
+			WP_CLI::warning( 'The --enable-ast-driver option is deprecated and has no effect.' );
 		}
 
 		if ( ! $is_porcelain ) {
@@ -138,7 +126,7 @@ class SQLite_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--enable-ast-driver]
-	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
+	 * : Deprecated. Has no effect; the current driver API is always used.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -160,14 +148,8 @@ class SQLite_Command extends WP_CLI_Command {
 	 * @when after_wp_config_load
 	 */
 	public function tables( $args, $assoc_args ) {
-		$enable_ast_driver = isset( $assoc_args['enable-ast-driver'] );
-
-		if ( $enable_ast_driver ) {
-			if ( ! defined( 'WP_SQLITE_AST_DRIVER' ) || ! WP_SQLITE_AST_DRIVER ) {
-				// @phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-				define( 'WP_SQLITE_AST_DRIVER', true );
-				// @phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-			}
+		if ( isset( $assoc_args['enable-ast-driver'] ) ) {
+			WP_CLI::warning( 'The --enable-ast-driver option is deprecated and has no effect.' );
 		}
 
 		$tables = new Tables();

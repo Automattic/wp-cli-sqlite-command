@@ -5,14 +5,12 @@ use Exception;
 use PDO;
 use WP_CLI;
 use WP_MySQL_On_SQLite;
-use WP_SQLite_Driver;
-use WP_SQLite_Translator;
 
 class Export {
 	/**
 	 * The SQLite driver instance.
 	 *
-	 * @var WP_MySQL_On_SQLite|WP_SQLite_Driver|WP_SQLite_Translator
+	 * @var WP_MySQL_On_SQLite
 	 */
 	protected $driver;
 
@@ -93,12 +91,6 @@ class Export {
 				continue;
 			}
 
-			// Skip internal tables used by the new SQLite driver
-			// (This is only needed when exporting with the legacy driver.)
-			if ( 0 === strpos( $table_name, '_wp_sqlite_' ) ) {
-				continue;
-			}
-
 			// Skip tables that are in the exclude_tables list
 			if ( in_array( $table_name, $exclude_tables, true ) ) {
 				continue;
@@ -118,15 +110,7 @@ class Export {
 	 */
 	protected function get_table_names() {
 		$result = $this->driver->query( 'SHOW TABLES' );
-		if ( $this->driver instanceof PDO ) {
-			return $result->fetchAll( PDO::FETCH_COLUMN );
-		}
-
-		$tables = array();
-		foreach ( $result as $row ) {
-			$tables[] = array_values( (array) $row )[0];
-		}
-		return $tables;
+		return $result->fetchAll( PDO::FETCH_COLUMN );
 	}
 
 	/**
@@ -178,14 +162,8 @@ class Export {
 	 */
 	protected function get_create_statement( $table_name ) {
 		$create = $this->driver->query( 'SHOW CREATE TABLE ' . $this->quote_identifier( $table_name ) );
-		if ( $this->driver instanceof PDO ) {
-			$sql = $create->fetchColumn( 1 );
-			return rtrim( $sql, ';' ) . ";\n";
-		}
-
-		$sql = $create[0]->{'Create Table'};
-		$sql = rtrim( $sql, ';' ); // The old SQLite driver appends a semicolon.
-		return $sql . ";\n";
+		$sql    = $create->fetchColumn( 1 );
+		return rtrim( $sql, ';' ) . ";\n";
 	}
 
 	/**
@@ -210,17 +188,7 @@ class Export {
 	 * @return array|false|string[]
 	 */
 	protected function get_exclude_tables() {
-		$exclude_tables = isset( $this->args['exclude_tables'] ) ? explode( ',', $this->args['exclude_tables'] ) : [];
-		return array_merge(
-			$exclude_tables,
-			[
-				// This list is only needed when exporting with the legacy driver.
-				// In the new SQLite driver, SHOW TABLES never returns these tables.
-				'_mysql_data_types_cache',
-				'sqlite_master',
-				'sqlite_sequence',
-			]
-		);
+		return isset( $this->args['exclude_tables'] ) ? explode( ',', $this->args['exclude_tables'] ) : [];
 	}
 
 	protected function display_result_message( $result_file ) {
@@ -329,12 +297,12 @@ class Export {
 	/**
 	 * Get the underlying SQLite PDO instance.
 	 *
+	 * Rows are read through the SQLite PDO directly so that large tables can be
+	 * streamed row by row instead of being materialized by the driver.
+	 *
 	 * @return PDO
 	 */
 	protected function get_sqlite_pdo() {
-		if ( $this->driver instanceof WP_SQLite_Translator ) {
-			return $this->driver->get_pdo();
-		}
 		return $this->driver->get_connection()->get_pdo();
 	}
 }
