@@ -169,7 +169,7 @@ Feature: WP-CLI SQLite Export Command
     And the file "test_export_serialized_settings.sql" should exist
     And the file "test_export_serialized_settings.sql" should contain:
       """
-      breadcrumb-separator";s:4:"\00bb
+      breadcrumb-separator\";s:4:\"\00bb
       """
     And the file "test_export_serialized_settings.sql" should contain:
       """
@@ -201,3 +201,30 @@ Feature: WP-CLI SQLite Export Command
       Success: Imported from 'test_export_escape_bytes.sql'.
       """
     And the SQL string escape bytes should be preserved
+
+  @require-sqlite
+  Scenario: Export should escape double quotes with a backslash
+    Given the SQLite database contains an option with a double quote
+    When I run `wp sqlite export test_export_dquote.sql --tables=wp_options`
+    Then STDOUT should contain:
+      """
+      Success: Export complete. File written to test_export_dquote.sql
+      """
+    And the file "test_export_dquote.sql" should exist
+    And the file "test_export_dquote.sql" should contain:
+      """
+      'double-quote-option','say \"hello\" backslash\\ end','yes'
+      """
+    When I run `wp sqlite --enable-ast-driver import test_export_dquote.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_export_dquote.sql'.
+      """
+    And the double quote option should be escaped and preserved
+
+  @require-sqlite
+  Scenario: Export keeps every INSERT on a single line
+    Given the SQLite database contains an option with SQL string escape bytes
+    When I run `wp sqlite export test_export_single_line.sql --tables=wp_options`
+    Then the file "test_export_single_line.sql" should exist
+    And every INSERT in the file "test_export_single_line.sql" should be on a single line

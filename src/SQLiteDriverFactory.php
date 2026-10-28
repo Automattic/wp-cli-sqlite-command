@@ -38,12 +38,16 @@ class SQLiteDriverFactory {
 	}
 
 	/**
-	 * Resolve configuration without initializing existing storage.
+	 * Resolve the configured SQLite database path.
+	 *
+	 * Does not check that the file exists and does not create storage
+	 * unless $create_database_if_missing is true; callers use the false
+	 * form to test whether an import would write into a new file.
 	 *
 	 * @param bool $create_database_if_missing Allow initialization when no secret path is recorded.
 	 * @return string
 	 */
-	private static function get_database_path( $create_database_if_missing ) {
+	public static function get_database_path( $create_database_if_missing ) {
 		if ( defined( 'DB_PATH' ) ) {
 			$database_path = DB_PATH;
 		} elseif ( defined( 'FQDB' ) ) {

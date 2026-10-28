@@ -34,6 +34,18 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 	}
 
 	/**
+	 * @Then /^the SQLite database should not contain a table named "([^"]*)"$/
+	 */
+	public function theSqliteDatabaseShouldNotContainATableNamed( $table_name ) {
+		$this->connectToDatabase();
+		$stmt = $this->db->prepare( "SELECT name FROM sqlite_master WHERE type='table' AND name=?" );
+		$stmt->execute( [ $table_name ] );
+		$row = $stmt->fetch();
+		if ( $row ) {
+			throw new Exception( "Table '$table_name' was found in the database but should not exist." );
+		}
+	}
+	/**
 	 * @Then /^the "([^"]*)" should contain a row with name "([^"]*)"$/
 	 * @Then /^the "([^"]*)" should contain a row with name:$/
 	 */
@@ -71,8 +83,15 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 
 	private function connectToDatabase() {
 		if ( ! $this->db ) {
-			$result  = $this->proc( 'wp eval \'echo defined( "DB_PATH" ) ? DB_PATH : FQDB;\'' )->run_check();
+			// Prefer the configured path without booting WordPress: the
+			// target may be a fresh import without WP tables installed.
+			$result  = $this->proc( 'wp config get DB_PATH' )->run();
 			$db_file = trim( $result->stdout );
+			if ( '' === $db_file || 0 === strpos( $db_file, 'Error:' ) ) {
+				// Fall back to a full boot so the drop-in resolves FQDB.
+				$result  = $this->proc( 'wp eval \'echo defined( "FQDB" ) ? FQDB : ""; \'' )->run_check();
+				$db_file = trim( $result->stdout );
+			}
 			if ( ! is_file( $db_file ) ) {
 				throw new Exception( 'The WordPress SQLite database does not exist.' );
 			}
@@ -344,5 +363,74 @@ class SQLiteFeatureContext extends WPCLIFeatureContext implements Context {
 			),
 			'run'
 		);
+	}
+
+	/**
+	 * @Given /^the SQLite database contains an option with a double quote$/
+	 */
+	public function theSqliteDatabaseContainsAnOptionWithADoubleQuote() {
+		$this->connectToDatabase();
+
+		$this->db->exec( "DELETE FROM wp_options WHERE option_name = 'double-quote-option'" );
+
+		$stmt = $this->db->prepare(
+			'
+			INSERT INTO wp_options (option_name, option_value, autoload)
+			VALUES (:option_name, :option_value, :autoload)
+			'
+		);
+		$stmt->execute(
+			array(
+				':option_name'  => 'double-quote-option',
+				':option_value' => 'say "hello" backslash\\ end',
+				':autoload'     => 'yes',
+			)
+		);
+	}
+
+	/**
+	 * @Then /^the double quote option should be escaped and preserved$/
+	 */
+	public function theDoubleQuoteOptionShouldBeEscapedAndPreserved() {
+		$this->connectToDatabase();
+
+		$stmt = $this->db->prepare( "SELECT option_value FROM wp_options WHERE option_name = 'double-quote-option'" );
+		$stmt->execute();
+		$value = $stmt->fetchColumn();
+
+		$expected = 'say "hello" backslash\\ end';
+		if ( $expected !== $value ) {
+			throw new Exception(
+				sprintf(
+					'Double quote option was not preserved. Expected %s, got %s.',
+					var_export( $expected, true ),
+					var_export( $value, true )
+				)
+			);
+		}
+	}
+
+	/**
+	 * @Then /^every INSERT in the file "([^"]*)" should be on a single line$/
+	 */
+	public function everyInsertInTheFileShouldBeOnASingleLine( $filename ) {
+		$full_path = $this->variables['RUN_DIR'] . '/' . $filename;
+		$lines     = file( $full_path, FILE_IGNORE_NEW_LINES );
+		if ( false === $lines ) {
+			throw new Exception( "Could not read file: $full_path" );
+		}
+		$insert_count = 0;
+		foreach ( $lines as $line ) {
+			if ( 0 !== strpos( ltrim( $line ), 'INSERT INTO' ) ) {
+				continue;
+			}
+			++$insert_count;
+			if ( ';' !== substr( rtrim( $line ), -1 ) ) {
+				throw new Exception( "INSERT statement spans multiple lines: $line" );
+			}
+		}
+		if ( 0 === $insert_count ) {
+			throw new Exception( "No INSERT statements found in file: $full_path" );
+		}
 	}
 }

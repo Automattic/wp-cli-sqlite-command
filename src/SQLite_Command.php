@@ -16,6 +16,12 @@ class SQLite_Command extends WP_CLI_Command {
 	 * <file>
 	 * : The name of the SQL file to import. If '-', then reads from STDIN. If omitted, it will look for '{dbname}.sql'.
 	 *
+	 * [--refuse-overwrite]
+	 * : Refuse to import when the SQLite database already contains user tables. By default the import merges into the existing database.
+	 *
+	 * [--verify-old-host=<host>]
+	 * : After loading, fail when any stored value still contains <host>, or when any PHP-serialized value no longer unserializes. The check runs inside the import transaction, so a failure rolls everything back.
+	 *
 	 * [--enable-ast-driver]
 	 * : Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
 	 *

@@ -191,6 +191,11 @@ class Export {
 	/**
 	 * Get the INSERT statements for a table.
 	 *
+	 * Each yielded statement is a single line: embedded newlines and other
+	 * special bytes are backslash-escaped by escape_string(), and the caller
+	 * terminates every statement with PHP_EOL. Line-oriented downstream
+	 * rewriters may therefore process the dump one statement per line.
+	 *
 	 * @param string $table_name
 	 *
 	 * @return \Generator
@@ -269,6 +274,11 @@ class Export {
 	/**
 	 * Escapes a string for use in an insert statement.
 	 *
+	 * Uses full MySQL backslash escaping, including double quotes, so that
+	 * each INSERT statement stays on a single line and remains safe for
+	 * line-oriented downstream rewriters (e.g. go-search-replace) as well
+	 * as for the quote-aware Import::parse_statements().
+	 *
 	 * @param $value
 	 *
 	 * @return string
@@ -281,6 +291,7 @@ class Export {
 				"\n"   => '\n',
 				"\r"   => '\r',
 				"\x1a" => '\Z',
+				'"'    => '\\"',
 				'\\'   => '\\\\',
 				"'"    => "\\'",
 			)

@@ -211,3 +211,102 @@ Feature: WP-CLI SQLite Import Command
       """
     And the SQLite database should contain a table named "wp_zz_parent"
     And the SQLite database should contain a table named "wp_aa_child"
+
+  @require-sqlite
+  Scenario: Refuse to overwrite an existing database
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO test_table (name) VALUES ('Test Name');
+      """
+    When I run `wp sqlite import test_import.sql`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    When I try `wp sqlite import test_import.sql --refuse-overwrite`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      already contains tables
+      """
+    And the SQLite database should contain a table named "test_table"
+
+  @require-sqlite
+  Scenario: Allow refuse-overwrite into a fresh database file
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO test_table (name) VALUES ('Test Name');
+      """
+    When I run `wp config set DB_PATH '{RUN_DIR}/fresh.sqlite'`
+    And I run `wp sqlite import test_import.sql --refuse-overwrite`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "test_table"
+
+  @require-sqlite
+  Scenario: Failed import into a new database removes the new file
+    Given a SQL dump file named "test_import_bad.sql" with content:
+      """
+      CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO missing_table (name) VALUES ('Test Name');
+      """
+    When I run `wp config set DB_PATH '{RUN_DIR}/atomic.sqlite'`
+    And I try `wp sqlite import test_import_bad.sql`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      Could not execute statement
+      """
+    And the atomic.sqlite file should not exist
+    And the atomic.sqlite-wal file should not exist
+    And the atomic.sqlite-shm file should not exist
+    And the atomic.sqlite-journal file should not exist
+
+  @require-sqlite
+  Scenario: Fail verification when the old host remains
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE verify_host (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO verify_host (name) VALUES ('https://oldhost.invalid/page');
+      """
+    When I try `wp sqlite import test_import.sql --verify-old-host=oldhost.invalid`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      still contain 'oldhost.invalid'
+      """
+    And the SQLite database should not contain a table named "verify_host"
+
+  @require-sqlite
+  Scenario: Pass verification when the old host is gone
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE verify_host (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO verify_host (name) VALUES ('https://newhost.invalid/page');
+      """
+    When I run `wp sqlite import test_import.sql --verify-old-host=oldhost.invalid`
+    Then STDOUT should contain:
+      """
+      Success: Imported from 'test_import.sql'.
+      """
+    And the SQLite database should contain a table named "verify_host"
+    And the "verify_host" should contain a row with name "https://newhost.invalid/page"
+
+  @require-sqlite
+  Scenario: Fail verification on corrupt serialized data
+    Given a SQL dump file named "test_import.sql" with content:
+      """
+      CREATE TABLE verify_serialized (id INTEGER PRIMARY KEY, name TEXT);
+      INSERT INTO verify_serialized (name) VALUES ('a:1:{s:3:"foo";s:4:"broken}');
+      """
+    When I try `wp sqlite import test_import.sql --verify-old-host=never-present.invalid`
+    Then the return code should be 1
+    And STDERR should contain:
+      """
+      invalid serialized data
+      """
+    And the SQLite database should not contain a table named "verify_serialized"
