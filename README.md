@@ -20,12 +20,20 @@ $ wp sqlite import <file>
 	<file>
 		The path to the MySQL compatible dump file to import. When passing `-` as the file argument, the SQL commands are read from standard input.
 
+	[--refuse-overwrite]
+		Refuse to import when the SQLite database already contains user tables. By default the import merges into the existing database.
+
+	[--verify-old-host=<host>]
+		After loading, fail when any stored value still contains <host>, or when any PHP-serialized value no longer unserializes. The check runs inside the import transaction, so a failure rolls everything back. A failed import into a new database file also deletes that file and its `-wal`, `-shm`, and `-journal` sidecars.
+
 	[--enable-ast-driver]
 		Enables the AST driver for older integration plugin releases. The current driver API is selected automatically.
 
 ### wp sqlite export
 
 Exports an SQLite database to a MySQL compatible file.
+
+Each `INSERT` statement is written on a single line: embedded newlines and other special bytes are backslash-escaped (including double quotes), so dumps are safe for line-oriented downstream rewriters as well as for quote-aware parsers.
 
 ```
 $ wp sqlite export [<file>] [--tables=<tables>] [--exclude-tables] [--porcelain]
