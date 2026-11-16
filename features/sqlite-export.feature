@@ -201,3 +201,20 @@ Feature: WP-CLI SQLite Export Command
       Success: Imported from 'test_export_escape_bytes.sql'.
       """
     And the SQL string escape bytes should be preserved
+
+  @require-sqlite
+  Scenario: Export should load into MySQL in any table order, like mysqldump
+    Given a SQL dump file named "test_fk_source.sql" with content:
+      """
+      CREATE TABLE wp_aa_child (
+        id INTEGER PRIMARY KEY,
+        parent_id INTEGER NOT NULL,
+        CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES wp_zz_parent(id)
+      );
+      INSERT INTO wp_aa_child (id, parent_id) VALUES (1, 1);
+      CREATE TABLE wp_zz_parent (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+      INSERT INTO wp_zz_parent (id, name) VALUES (1, 'Parent Row');
+      """
+    And I run `wp sqlite --enable-ast-driver import test_fk_source.sql`
+    When I run `wp sqlite --enable-ast-driver export - --tables=wp_aa_child,wp_zz_parent`
+    Then STDOUT should match /SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\s+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;\s+--\s+-- Table structure for table `wp_aa_child`.+-- Table structure for table `wp_zz_parent`.+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;\s+SET SQL_MODE=@OLD_SQL_MODE;\s+-- Dump completed/s
