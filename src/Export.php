@@ -117,7 +117,7 @@ class Export {
 
 		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' . PHP_EOL );
 		fwrite( $handle, 'SET SQL_MODE=@OLD_SQL_MODE;' . PHP_EOL . PHP_EOL );
-		fwrite( $handle, sprintf( '-- Dump completed on %s', gmdate( 'c' ) ) );
+		fwrite( $handle, sprintf( '-- Dump completed on %s', gmdate( 'c' ) ) . PHP_EOL );
 	}
 
 	/**
