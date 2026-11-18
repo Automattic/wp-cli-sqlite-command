@@ -25,10 +25,10 @@
   ],
   "require": {
     "php": ">=7.4",
-    "wp-cli/wp-cli": "^2.12"
+    "wp-cli/wp-cli": "^2.12 || ^3.0@dev"
   },
   "require-dev": {
-    "wp-cli/wp-cli-tests": "^5.0",
+    "wp-cli/wp-cli-tests": "^5.3.4",
     "phpcompatibility/php-compatibility": "^10.0@alpha",
     "wp-coding-standards/wpcs": "@dev"
   },
@@ -48,6 +48,7 @@
       "@behat"
     ]
   },
+  "prefer-stable": true,
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
