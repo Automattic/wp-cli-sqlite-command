@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    uses: wp-cli/.github/.github/workflows/reusable-testing.yml@4c37c47e01b5d1fe256edf40de33454d8bee37d4 # main
+    uses: wp-cli/.github/.github/workflows/reusable-testing.yml@c819f58d5eb141a15043a762e4a6099941cc8ea6 # main
     with:
       minimum-php: "7.4"
       matrix: '{ "exclude": [{ "os": "windows-latest" }] }'
