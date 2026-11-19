@@ -15,7 +15,7 @@ Imports a MySQL dump file into the SQLite database. Parses SQL statements using 
 
 ### `wp sqlite export [<file>]`
 
-Exports the SQLite database to a MySQL-compatible SQL dump file. Generates `DROP TABLE IF EXISTS`, `CREATE TABLE`, and `INSERT INTO` statements for each table. Internal SQLite system tables are never included; the driver's `SHOW TABLES` already excludes them.
+Exports the SQLite database to a MySQL-compatible SQL dump file. Generates `DROP TABLE IF EXISTS`, `CREATE TABLE`, and `INSERT INTO` statements for each table, wrapped, like `mysqldump`, in statements that disable foreign key checks and set `SQL_MODE` to `NO_AUTO_VALUE_ON_ZERO` while the dump loads. Internal SQLite system tables are never included; the driver's `SHOW TABLES` already excludes them.
 
 **Parameters:**
 
