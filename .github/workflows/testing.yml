@@ -1,11 +1,15 @@
 name: Testing
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
       - master
+  # The shared workflow runs its allowed-to-fail jobs (macOS, MariaDB, PHP nightly) only on scheduled and manual runs.
+  schedule:
+    - cron: "17 1 * * *"
 
 jobs:
   test:
