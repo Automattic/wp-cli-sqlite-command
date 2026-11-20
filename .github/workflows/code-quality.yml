@@ -9,4 +9,4 @@ on:
 
 jobs:
   code-quality:
-    uses: wp-cli/.github/.github/workflows/reusable-code-quality.yml@5a55e811a46f1ac4946dbd337b74ea7f23ebe014 # main
+    uses: wp-cli/.github/.github/workflows/reusable-code-quality.yml@c819f58d5eb141a15043a762e4a6099941cc8ea6 # main
