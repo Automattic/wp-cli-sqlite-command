@@ -89,9 +89,11 @@ class Export {
 
 		// Like mysqldump: tables are written in SHOW TABLES order, so a foreign key can reference
 		// a table created later in the dump, and WordPress tables use zero dates that strict
-		// SQL modes reject.
-		fwrite( $handle, "SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO';" . PHP_EOL );
-		fwrite( $handle, 'SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;' . PHP_EOL . PHP_EOL );
+		// SQL modes reject. The values are literals rather than saved in user variables, because
+		// some importers run the statements over several connections, where a saved variable
+		// is NULL and restoring it fails.
+		fwrite( $handle, "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';" . PHP_EOL );
+		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=0;' . PHP_EOL . PHP_EOL );
 
 		foreach ( $this->get_table_names() as $table_name ) {
 
@@ -115,8 +117,7 @@ class Export {
 			$this->write_insert_statements( $handle, $table_name );
 		}
 
-		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' . PHP_EOL );
-		fwrite( $handle, 'SET SQL_MODE=@OLD_SQL_MODE;' . PHP_EOL . PHP_EOL );
+		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=1;' . PHP_EOL . PHP_EOL );
 		fwrite( $handle, sprintf( '-- Dump completed on %s', gmdate( 'c' ) ) . PHP_EOL );
 	}
 
