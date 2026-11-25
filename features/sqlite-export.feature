@@ -222,7 +222,7 @@ Feature: WP-CLI SQLite Export Command
       CONSTRAINT `fk_parent` FOREIGN KEY (`parent_id`) REFERENCES `wp_zz_parent` (`id`)
       """
     When I run `cat test_fk_export.sql`
-    Then STDOUT should match /^SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\s+SET FOREIGN_KEY_CHECKS=0;\s+--\s+-- Table structure for table `wp_aa_child`.+-- Table structure for table `wp_zz_parent`.+SET FOREIGN_KEY_CHECKS=1;\s+-- Dump completed on \S+\n$/s
+    Then STDOUT should match /^SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\s+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;\s+--\s+-- Table structure for table `wp_aa_child`.+-- Table structure for table `wp_zz_parent`.+SET FOREIGN_KEY_CHECKS=COALESCE\(@OLD_FOREIGN_KEY_CHECKS, @@FOREIGN_KEY_CHECKS\);\s+SET SQL_MODE=COALESCE\(@OLD_SQL_MODE, @@SQL_MODE\);\s+-- Dump completed on \S+\n$/s
 
     When I run `wp --exec="define( 'DB_PATH', getcwd() . '/test_fk_reimport.sqlite' );" sqlite --enable-ast-driver import test_fk_export.sql`
     Then STDOUT should contain:
