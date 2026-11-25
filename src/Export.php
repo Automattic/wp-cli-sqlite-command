@@ -115,8 +115,11 @@ class Export {
 			$this->write_insert_statements( $handle, $table_name );
 		}
 
-		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' . PHP_EOL );
-		fwrite( $handle, 'SET SQL_MODE=@OLD_SQL_MODE;' . PHP_EOL . PHP_EOL );
+		// Unlike mysqldump, the restore falls back to the current value: some importers, such as
+		// Jetpack Backup's restore, run the statements over several connections, where the saved
+		// variable is NULL and MySQL refuses to set it.
+		fwrite( $handle, 'SET FOREIGN_KEY_CHECKS=COALESCE(@OLD_FOREIGN_KEY_CHECKS, @@FOREIGN_KEY_CHECKS);' . PHP_EOL );
+		fwrite( $handle, 'SET SQL_MODE=COALESCE(@OLD_SQL_MODE, @@SQL_MODE);' . PHP_EOL . PHP_EOL );
 		fwrite( $handle, sprintf( '-- Dump completed on %s', gmdate( 'c' ) ) . PHP_EOL );
 	}
 
